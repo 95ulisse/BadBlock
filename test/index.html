@@ -6,22 +6,10 @@
 </head>
 <body>
 
-    <canvas width="640" height="480"></canvas>
-
-    <div id="div" style="position: absolute; left: 0; width: 50px; height: 50px; background-color: red;">&nbsp;</div>
+    <canvas id="game" width="640" height="480"></canvas>
 
     <script type="text/javascript">
-        var Tween = badblock.Tween,
-            Timer = badblock.Timer;
-
-        var t = new Tween({ startValue: 0, endValue: 100, duration: 500, loop: 'loopReverse', loopTimes: 4, easing: 'bounceOut' });
-        t.on('change', x => div.style.top = x + 'px');
-        t.on('end', () => { console.warn('END'); timer.stop(); });
-
-        var timer = new Timer();
-        timer.on('tick', ({ delta }) => t.update(delta));
-        timer.start();
-
+        (new badblock.App(document.getElementById('game'))).start();
     </script>
 
 </body>

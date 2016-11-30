@@ -50,7 +50,7 @@ export default class Tween extends EventEmitter {
         extend(this, {
             startValue: 0,
             endValue: 1,
-            duration: 1,
+            duration: 1000,
             startTime: 0,
             loop: 'single',
             loopTimes: Infinity,
