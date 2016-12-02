@@ -1,5 +1,7 @@
 var path = require('path'),
-    webpack = require('webpack');
+    webpack = require('webpack'),
+    ExtractTextPlugin = require('extract-text-webpack-plugin'),
+    autoprefixer = require('autoprefixer');
 
 module.exports = {
     context: path.join(__dirname, 'src'),
@@ -24,10 +26,20 @@ module.exports = {
                 test: /\.js$/,
                 exclude: /node_modules\/(?!phy6)/,
                 loaders: [ 'babel' ]
+            },
+            {
+                test: /\.scss$/,
+                loader: ExtractTextPlugin.extract('css!postcss!sass')
             }
         ],
     },
     plugins: [
-        new webpack.NoErrorsPlugin()
+        new webpack.NoErrorsPlugin(),
+        new ExtractTextPlugin('[name].css')
     ],
+    postcss: [
+        autoprefixer({
+            browsers: [ 'last 2 versions' ]
+        })
+    ]
 };
