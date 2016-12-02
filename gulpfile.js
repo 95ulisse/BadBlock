@@ -23,7 +23,7 @@ gulp.task('lint', function () {
         .pipe(eslint.failAfterError());
 });
 
-gulp.task('test', [], function () {
+gulp.task('serve', [], function () {
 
     // Debug mode specific settings
     const port = 8080;
@@ -32,7 +32,7 @@ gulp.task('test', [], function () {
 
     // Starts the dev server
     new WebpackDevServer(webpack(webpackConfig), {
-        contentBase: path.join(__dirname, 'test'),
+        contentBase: path.join(__dirname, 'src'),
         stats: { colors: true }
     })
     .listen(port, 'localhost', function (e) {
