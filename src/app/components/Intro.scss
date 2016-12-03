@@ -1,3 +1,5 @@
+@import "_variables";
+
 .title-letter {
     fill: $background-color;
     stroke: #000;
@@ -19,11 +21,11 @@
         title-block-rotation 4s 4.5s linear infinite;
 }
 
-#title-group1 {
+.title-group1 {
     animation: title-group1-displacement 0.2s 4.4s ease-out forwards;
 }
 
-#title-group2 {
+.title-group2 {
     animation: title-group2-displacement 0.2s 4.4s ease-out forwards;
 }
 

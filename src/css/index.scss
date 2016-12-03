@@ -1,14 +1,12 @@
-@import "./_variables";
+@import "_variables";
 
 body {
-    background-color: #333;
+    background-color: $background-color;
 }
 
-.game-area {
+:global(#game-area) {
     display: block;
     width: 640px;
     height: 480px;
     margin: 0 auto;
 }
-
-@import "./_intro";

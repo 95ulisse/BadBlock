@@ -29,7 +29,11 @@ module.exports = {
             },
             {
                 test: /\.scss$/,
-                loader: ExtractTextPlugin.extract('css!postcss!sass')
+                loader: ExtractTextPlugin.extract([
+                    'css?modules&importLoaders=1&localIdentName=[name]__[local]__[hash:base64:5]',
+                    'postcss',
+                    'sass'
+                ].join('!'))
             }
         ],
     },
@@ -41,5 +45,8 @@ module.exports = {
         autoprefixer({
             browsers: [ 'last 2 versions' ]
         })
-    ]
+    ],
+    sassLoader: {
+        includePaths: [ path.resolve(__dirname, "./src/css") ]
+    }
 };
