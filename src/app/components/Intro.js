@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { Component } from 'react';
 
 import styles from './Intro.scss';
 
-export default class Intro extends React.Component {
+export default class Intro extends Component {
     render() {
         return (
             <svg width="640" height="480" viewBox="0 0 640 480">
