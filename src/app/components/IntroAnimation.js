@@ -1,11 +1,37 @@
-import React, { Component } from 'react';
+import React, { Component, PropTypes } from 'react';
+import autobind from 'autobind-decorator';
 
-import styles from './Intro.scss';
+import Timeline from '../../util/Timeline';
 
-export default class Intro extends Component {
+import styles from './IntroAnimation.scss';
+
+export default class IntroAnimation extends Component {
+
+    static propTypes = {
+        onPlayClick: PropTypes.func.isRequired
+    };
+
+    @autobind
+    startOutroAnimation() {
+        const { _svg } = this;
+        const { onPlayClick } = this.props;
+
+        if (!_svg) {
+            return;
+        }
+
+        // Creates a new timeline describing the outro animation
+        // and immediately starts it. At the end of the animation,
+        // call the event handler.
+        new Timeline()
+            .styleTo(_svg, 'opacity', 0, 1000)
+            .start()
+            .on('end', () => onPlayClick());
+    }
+
     render() {
         return (
-            <svg width="640" height="480" viewBox="0 0 640 480">
+            <svg width="640" height="480" viewBox="0 0 640 480" ref={c => this._svg = c}>
 
                 <g className={styles['title-logo']}>
 
@@ -39,7 +65,7 @@ export default class Intro extends Component {
                 </g>
 
                 {/* Play button */}
-                <g className={styles['title-play-button']}>
+                <g className={styles['title-play-button']} onClick={this.startOutroAnimation}>
                     <path className={styles['title-play-path']} style={{ fill: '#06c' }}
                         d="M 376.76423,371.18643 A 56.764237,56.764237 0 0 1 320,427.95066 56.764237,56.764237 0 0 1 263.23577,371.18643 56.764237,56.764237 0 0 1 320,314.4222 a 56.764237,56.764237 0 0 1 56.76423,56.76423 z" />
                     <path className={styles['title-play-path']} style={{ fill: '#dcb164' }}
@@ -48,5 +74,6 @@ export default class Intro extends Component {
 
             </svg>
         );
-    }
+    };
+
 };

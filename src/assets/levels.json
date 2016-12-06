@@ -1,0 +1,14 @@
+[
+    {
+        "name": "Slow start",
+        "worldSize" : {
+            "width": 320,
+            "height": 240
+        },
+        "heroPosition": { "x": 100, "y": 100 },
+        "goalPosition": { "x": 150, "y": 100 }, 
+        "coins": [
+            { "x": 200, "y": 100 }
+        ]
+    }
+]

@@ -60,6 +60,7 @@ export default class Tween extends EventEmitter {
 
         this._absoluteTime = 0;
         this._lastValue = null;
+        this.ended = false;
     }
 
     startValue(v) {
@@ -102,11 +103,6 @@ export default class Tween extends EventEmitter {
         return this;
     }
 
-    onChange(cb) {
-        this.on('change', cb);
-        return this;
-    }
-    
     /**
      * Notifies the tween that time has passed.
      * Automatically computes the new value and raises the needed events.
@@ -224,6 +220,7 @@ export default class Tween extends EventEmitter {
         }
 
         // Emit `end` if the value will never change again
+        this.ended = emitEnd;
         if (emitEnd) {
             this.emit('end');
         }

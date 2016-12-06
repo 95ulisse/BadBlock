@@ -1,24 +1,41 @@
-import React, { Component } from 'react';
+import React, { PropTypes } from 'react';
 
-import Loading from './components/Loading';
-import Intro from './components/Intro';
+import { connect } from '../util/state';
+import Loading from './containers/Loading';
+import Intro from './containers/Intro';
+import LevelSelect from './containers/LevelSelect';
+import Error from './containers/Error';
 
-export default class App extends Component {
+const App = props => {
+    let Stage;
     
-    constructor(props) {
-        super(props);
-        this.state = {
-            stage: Loading
-        };
-        this.navigator = {
-            goToIntro: () => this.setState({ stage: Intro })
-        };
+    switch (props.stage) {
+        
+        case 'loading':
+            Stage = Loading;
+            break;
+        
+        case 'intro':
+            Stage = Intro;
+            break;
+        
+        case 'levelselect':
+            Stage = LevelSelect;
+            break;
+        
+        case 'error':
+            Stage = Error;
+            break;
+
     }
 
-    render() {
-        const navigator = this.navigator;
-        const Stage = this.state.stage;
-        return <Stage navigator={navigator} />;
-    }
-
+    return <Stage />;
 };
+
+App.propTypes = {
+    stage: PropTypes.string.isRequired
+};
+
+export default connect(state => ({
+    stage: state.app.stage
+}))(App)
