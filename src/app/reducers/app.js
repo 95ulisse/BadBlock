@@ -1,6 +1,6 @@
 export default (state, action) => {
     if (!state) {
-        return { stage: 'loading' };
+        return { stage: 'loading', currentLevel: -1 };
     }
     switch (action.type) {
 
@@ -10,16 +10,23 @@ export default (state, action) => {
                 stage: 'intro'
             };
 
+        case 'GO_TO_ERROR':
+            return {
+                ...state,
+                stage: 'error'
+            };
+
         case 'GO_TO_LEVEL_SELECT':
             return {
                 ...state,
                 stage: 'levelselect'
             };
 
-        case 'GO_TO_ERROR':
+        case 'GO_TO_LEVEL':
             return {
                 ...state,
-                stage: 'error'
+                stage: 'level',
+                currentLevel: action.payload
             };
 
         default:

@@ -1,6 +1,6 @@
 export default (state, action) => {
     if (!state) {
-        return { levels: [] };
+        return { allLevels: [] };
     }
     switch (action.type) {
         case 'UPDATE_LEVELS':

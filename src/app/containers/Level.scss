@@ -1,0 +1,25 @@
+.level {
+    width: 640px;
+    height: 480px;
+    position: relative;
+
+    canvas {
+        width: 640px;
+        height: 480px;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+}
+
+.modal {
+    top: 50%;
+    left: 50%;
+    position: absolute;
+
+    & > div {
+        top: -50%;
+        left: -50%;
+        position: relative;
+    }
+}

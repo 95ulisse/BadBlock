@@ -3,8 +3,9 @@ import React, { PropTypes } from 'react';
 import { connect } from '../util/state';
 import Loading from './containers/Loading';
 import Intro from './containers/Intro';
-import LevelSelect from './containers/LevelSelect';
 import Error from './containers/Error';
+import LevelSelect from './containers/LevelSelect';
+import Level from './containers/Level';
 
 const App = props => {
     let Stage;
@@ -19,14 +20,17 @@ const App = props => {
             Stage = Intro;
             break;
         
+        case 'error':
+            Stage = Error;
+            break;
+        
         case 'levelselect':
             Stage = LevelSelect;
             break;
         
-        case 'error':
-            Stage = Error;
+        case 'level':
+            Stage = Level;
             break;
-
     }
 
     return <Stage />;

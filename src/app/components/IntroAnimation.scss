@@ -48,6 +48,7 @@
     transform: scale(1);
     transform-origin: 50% 50%;
     cursor: pointer;
+    pointer-events: none;
     animation: title-play-button-pulse 3s 9s linear infinite;
 }
 
@@ -137,6 +138,7 @@
 
 @keyframes title-play-button-pulse {
     0% {
+        pointer-events: all;
         transform: scale(1);
     }
     40% {
@@ -155,6 +157,7 @@
         transform: scale(1);
     }
     100% {
+        pointer-events: all;
         transform: scale(1);
     }
 }

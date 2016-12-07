@@ -6,11 +6,13 @@ export default class LevelThumb extends Component {
 
     static propTypes = {
         entranceDelay: PropTypes.number,
-        level: PropTypes.object.isRequired
+        level: PropTypes.object.isRequired,
+        onClick: PropTypes.func
     };
 
     static defaultProps = {
-        entranceDelay: 0
+        entranceDelay: 0,
+        onClick: () => {}
     };
 
     constructor(props) {
@@ -25,12 +27,12 @@ export default class LevelThumb extends Component {
     }
 
     render() {
-        const { level } = this.props;
+        const { level, onClick } = this.props;
         const { isIn } = this.state;
         const inClass = isIn ? ' ' + styles['in'] : '';
 
         return (
-            <div className={styles['level-thumb'] + inClass}>
+            <div className={styles['level-thumb'] + inClass} onClick={onClick}>
                 <span>{level.name}</span>
             </div>
         );
