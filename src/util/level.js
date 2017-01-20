@@ -30,6 +30,9 @@ const GOAL_RADIUS = 15;
  * And the following properties representing the state of the level:
  * - `coinsCollected`
  * - `totalCoins`
+ * 
+ * Also, the following methods are available:
+ * - `computeStars(shots)`
  */
 export const buildLevel = (level, engine) => {
     
@@ -92,6 +95,16 @@ export const buildLevel = (level, engine) => {
         });
         return coin;
     }))
+
+    // Public methods
+    ret.computeStars = (shots) => {
+        for (let i = 0; i < level.stars.length; i++) {
+            if (shots <= level.stars[i]) {
+                return level.stars.length - i;
+            }
+        }
+        return 0;
+    };
 
     return ret;
 

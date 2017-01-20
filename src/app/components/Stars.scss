@@ -1,0 +1,39 @@
+@import "_variables";
+
+$max-stars: 3;
+$entrance-duration: 400ms;
+$entrance-delay: 200ms;
+$entrance-easing: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+.stars-container {
+    display: inline-block;
+    color: desaturate($accent-color, 50%);
+
+    & > span {
+        display: inline-block;
+        transform: scale(0);
+        cursor: default;
+    }
+
+    @for $i from 1 through 3 {
+        & > span:nth-child(#{$i}) {
+            animation: entrance $entrance-duration #{$i * $entrance-delay} $entrance-easing forwards;
+        }
+    }
+
+    .active {
+        color: $accent-color;
+    }
+}
+
+@keyframes entrance {
+    0% {
+        transform: scale(0);
+    }
+    75% {
+        transform: scale(1.25);
+    }
+    100% {
+        transform: scale(1);
+    }
+}

@@ -47,9 +47,12 @@
 .title-play-button {
     transform: scale(1);
     transform-origin: 50% 50%;
-    cursor: pointer;
     pointer-events: none;
     animation: title-play-button-pulse 3s 9s linear infinite;
+
+    path {
+        cursor: pointer;
+    }
 }
 
 @keyframes title-letter-entrance {

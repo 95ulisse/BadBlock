@@ -6,6 +6,7 @@
     canvas {
         width: 640px;
         height: 480px;
+        transition: filter 300ms ease-out;
     }
 
     .top-bar {
@@ -15,11 +16,13 @@
         .stat {
             font-size: 25px;
 
+            // First child on the left
             &:first-child {
                 float: left;
                 margin-left: 25px;
             }
 
+            // Second child on the right
             &:last-child {
                 float: right;
                 margin-right: 25px;
@@ -36,6 +39,10 @@
     }
 }
 
+.blurred {
+    filter: blur(5px);
+}
+
 .modal-container {
     position: relative;
 }
@@ -46,8 +53,16 @@
     position: absolute;
 
     & > div {
-        top: -50%;
-        left: -50%;
-        position: relative;
+        transform: translate(-50%, -50%);
+        animation: modal-entrance 300ms 0ms ease-out forwards;
+    }
+}
+
+@keyframes modal-entrance {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
     }
 }

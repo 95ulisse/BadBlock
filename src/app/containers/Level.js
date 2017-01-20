@@ -3,26 +3,20 @@ import { Vector, Engine, Timer, Renderer } from 'phy6-js';
 import autobind from 'autobind-decorator';
 
 import { connect } from '../../util/state';
-import { goToLevelSelect } from '../actions/app';
 import * as LevelHelpers from '../../util/level';
 
 import ChangeAnimation from '../components/ChangeAnimation';
+import LevelCompletedModal from '../components/LevelCompletedModal';
 
 import styles from './Level.scss';
 
-@connect(
-    state => ({
-        level: state.levels.allLevels[state.app.currentLevel]
-    }),
-    dispatch => ({
-        goToLevelSelect: l => dispatch(goToLevelSelect())
-    })
-)
+@connect(state => ({
+    level: state.levels.allLevels[state.app.currentLevel]
+}))
 export default class Level extends Component {
 
     static propTypes = {
-        level: PropTypes.object.isRequired,
-        goToLevelSelect: PropTypes.func.isRequired
+        level: PropTypes.object.isRequired
     };
 
     constructor(props) {
@@ -30,8 +24,7 @@ export default class Level extends Component {
         this.state = {
             state: 'beforeStart', // beforeStart | playing | paused | won | lost
             coinsCollected: 0,
-            shots: 0,
-            time: -1
+            shots: 0
         };
 
         // These objects reside of the state because they will never change
@@ -46,10 +39,20 @@ export default class Level extends Component {
 
     }
 
-    buildLevel() {
+    componentWillReceiveProps(nextProps) {
+
+        if (nextProps.level === this.props.level) {
+            return;
+        }
+
+        this.loadLevel(nextProps.level);
+
+    }
+
+    buildLevel(levelDescription = this.props.level) {
         
         // Builds the level
-        this.level = LevelHelpers.buildLevel(this.props.level, this.engine);
+        this.level = LevelHelpers.buildLevel(levelDescription, this.engine);
 
         // Registers callbacks for the events of our interest
         this.level.on('won', () => this.changeState('won'));
@@ -58,22 +61,27 @@ export default class Level extends Component {
             this.setState({ coinsCollected: this.level.coinsCollected });
         });
 
-    }
-
-    componentWillReceiveProps(nextProps) {
-
-        if (nextProps.level === this.props.level) {
-            return;
+        // If the canvas is already referenced, force a redraw
+        if (this.canvas) {
+            this.renderer.render();
         }
 
+    }
+
+    loadLevel(levelDescription) {
+        
         // Clean the engine, stop the timer, reset everything of the previous level
         if (this.level) {
             this.level.removeAllListeners();
             this.engine.bodies.length = 0;
             this.changeState('beforeStart');
+            this.setState({
+                coinsCollected: 0,
+                shots: 0
+            });
         }
 
-        this.buildLevel();
+        this.buildLevel(levelDescription);
 
     }
 
@@ -97,6 +105,12 @@ export default class Level extends Component {
 
         // Change the state
         this.setState({ state: newState });
+    }
+
+    @autobind
+    replayLevel() {
+        // Reload the same level
+        this.loadLevel(this.props.level);
     }
 
     @autobind
@@ -153,6 +167,7 @@ export default class Level extends Component {
 
     render() {
 
+        const level = this.level;
         const { goToLevelSelect } = this.props;
         const { state, coinsCollected, shots } = this.state;
 
@@ -162,7 +177,7 @@ export default class Level extends Component {
         switch (state) {
             
             case 'beforeStart':
-                modal = <button onClick={this.changeState.bind(this, 'playing')}>Click to start</button>;
+                modal = <button className="btn" onClick={this.changeState.bind(this, 'playing')}>Click to start</button>;
                 break;
             
             case 'playing':
@@ -172,11 +187,11 @@ export default class Level extends Component {
                 break;
             
             case 'won':
-                modal = <button onClick={goToLevelSelect}>You Won!</button>;
+                modal = <LevelCompletedModal level={level} shots={shots} replayLevel={this.replayLevel} />;
                 break;
             
             case 'lost':
-                modal = <button>You Lost :(</button>;
+                modal = <button className="btn">You Lost :(</button>;
                 break;
             
         }
@@ -187,7 +202,7 @@ export default class Level extends Component {
                 <span className={styles['stat']}>
                     <span>Coins:&nbsp;</span>
                     <ChangeAnimation>{coinsCollected}</ChangeAnimation>
-                    <span>/{this.level.totalCoins}</span>
+                    <span>/{level.totalCoins}</span>
                 </span>
                 <span className={styles['stat']}>
                     <span>Shots:&nbsp;</span>
@@ -202,11 +217,12 @@ export default class Level extends Component {
                 {/* Top bar */}
                 {topBar}
 
-                {/* Modal container to allow modals to cover only the game canvas */}
+                {/* Modal container to allow modals to cover only the game canvas.
+                    Also, blur the canvas if the modal is visible. */}
                 <div className={styles['modal-container']}>
 
                     {/* Game canvas */}
-                    <canvas width="640" height="480"
+                    <canvas width="640" height="480" className={modal ? styles['blurred'] : ''}
                         ref={this.onCanvasRef} onMouseDown={this.onCanvasMouseDown}>
                     </canvas>
 

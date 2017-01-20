@@ -1,0 +1,21 @@
+.container {
+    width: 400px;
+    height: 300px;
+    box-sizing: border-box;
+    padding: 30px 60px;
+    border: 1px solid #585858;
+    border-radius: 10px;
+    background-image: radial-gradient(circle at bottom right, #ffee57, #feffb5);
+    box-shadow: 0px 0px 5px 1px rgb(47, 47, 47);
+    position: relative;
+    overflow: hidden;
+
+    h1 {
+        margin: 0 0 -20px 0;
+        text-align: center;
+    }
+
+    :global(.btn) {
+        width: 130px;
+    }
+}
