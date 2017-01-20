@@ -1,15 +1,43 @@
+@import "_variables";
+@import "_utils";
+
 .level {
-    width: 640px;
-    height: 480px;
-    position: relative;
 
     canvas {
         width: 640px;
         height: 480px;
-        position: absolute;
-        top: 0;
-        left: 0;
     }
+
+    .top-bar {
+        position: relative;
+        @include clearfix();
+
+        .stat {
+            font-size: 25px;
+
+            &:first-child {
+                float: left;
+                margin-left: 25px;
+            }
+
+            &:last-child {
+                float: right;
+                margin-right: 25px;
+            }
+
+            & > * {
+                vertical-align: middle;
+            }
+
+            div {
+                font-weight: bold;
+            }
+        }
+    }
+}
+
+.modal-container {
+    position: relative;
 }
 
 .modal {

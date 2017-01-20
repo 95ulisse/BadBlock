@@ -1,0 +1,56 @@
+@import "_utils";
+
+.container {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    @include clearfix();
+
+    // To make clearfix work, one child is floating on the left,
+    // the other is absolutely positioned over it.
+
+    .current {
+        display: block;
+        float: left;
+    }
+
+    .next {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    // Animations defined for both the children
+
+    .in {
+        animation: entrance 200ms 0s ease-out forwards;
+    }
+
+    .out {
+        animation: exit 200ms 0s ease-out forwards;
+    }
+
+}
+
+@keyframes entrance {
+    0% {
+        opacity: 0;
+        transform: translate(0, 100%);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+}
+
+@keyframes exit {
+    0% {
+        opacity: 1;
+        transform: translate(0, 0);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(0, -100%);
+    }
+}

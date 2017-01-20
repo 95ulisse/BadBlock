@@ -3,24 +3,35 @@ import { Vector, Engine, Timer, Renderer } from 'phy6-js';
 import autobind from 'autobind-decorator';
 
 import { connect } from '../../util/state';
+import { goToLevelSelect } from '../actions/app';
 import * as LevelHelpers from '../../util/level';
+
+import ChangeAnimation from '../components/ChangeAnimation';
 
 import styles from './Level.scss';
 
-@connect(state => ({
-    level: state.levels.allLevels[state.app.currentLevel]
-}))
+@connect(
+    state => ({
+        level: state.levels.allLevels[state.app.currentLevel]
+    }),
+    dispatch => ({
+        goToLevelSelect: l => dispatch(goToLevelSelect())
+    })
+)
 export default class Level extends Component {
 
     static propTypes = {
-        level: PropTypes.object.isRequired
+        level: PropTypes.object.isRequired,
+        goToLevelSelect: PropTypes.func.isRequired
     };
 
     constructor(props) {
         super(props);
         this.state = {
             state: 'beforeStart', // beforeStart | playing | paused | won | lost
-            coinsCollected: 0
+            coinsCollected: 0,
+            shots: 0,
+            time: -1
         };
 
         // These objects reside of the state because they will never change
@@ -104,6 +115,11 @@ export default class Level extends Component {
     @autobind
     onCanvasMouseDown(e) {
         const hero = this.level.hero;
+        const { state, shots } = this.state;
+
+        if (state != 'playing') {
+            return;
+        }
 
         // We need to relativize the coordinates, so we traverse the hierarchy
         // to compute the total offset of the element from the document
@@ -130,11 +146,15 @@ export default class Level extends Component {
         // Applies a force to the hero to make it move
         hero.applyForce(force, hero.position);
 
+        // Increment the shots count
+        this.setState({ shots: shots + 1 });
+
     }
 
     render() {
 
-        const { state, coinsCollected } = this.state;
+        const { goToLevelSelect } = this.props;
+        const { state, coinsCollected, shots } = this.state;
 
         // Switches on the current state to build the modal
         // that will be drawn above the game area
@@ -152,7 +172,7 @@ export default class Level extends Component {
                 break;
             
             case 'won':
-                modal = <button>You Won!</button>;
+                modal = <button onClick={goToLevelSelect}>You Won!</button>;
                 break;
             
             case 'lost':
@@ -161,22 +181,45 @@ export default class Level extends Component {
             
         }
 
+        // Top bar with statistics
+        let topBar = (
+            <div className={styles['top-bar']}>
+                <span className={styles['stat']}>
+                    <span>Coins:&nbsp;</span>
+                    <ChangeAnimation>{coinsCollected}</ChangeAnimation>
+                    <span>/{this.level.totalCoins}</span>
+                </span>
+                <span className={styles['stat']}>
+                    <span>Shots:&nbsp;</span>
+                    <ChangeAnimation>{shots}</ChangeAnimation>
+                </span>
+            </div>
+        );
+
         return (
             <div className={styles['level']}>
                 
-                {/* Game canvas */}
-                <canvas width="640" height="480"
-                    ref={this.onCanvasRef} onMouseDown={this.onCanvasMouseDown}>
-                </canvas>
+                {/* Top bar */}
+                {topBar}
 
-                {/* Modal messages that will apear above the game */}
-                {modal &&
-                    <div className={styles['modal']}>
-                        <div>
-                            {modal}
+                {/* Modal container to allow modals to cover only the game canvas */}
+                <div className={styles['modal-container']}>
+
+                    {/* Game canvas */}
+                    <canvas width="640" height="480"
+                        ref={this.onCanvasRef} onMouseDown={this.onCanvasMouseDown}>
+                    </canvas>
+
+                    {/* Modal messages that will apear above the game */}
+                    {modal &&
+                        <div className={styles['modal']}>
+                            <div>
+                                {modal}
+                            </div>
                         </div>
-                    </div>
-                }
+                    }
+
+                </div>
 
             </div>
         );

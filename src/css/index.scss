@@ -2,12 +2,16 @@
 
 body {
     background-color: $background-color;
+    font-family: $font-family;
+}
+
+* {
+    user-select: none;
 }
 
 :global(#game-area) {
     display: block;
     width: 640px;
-    height: 480px;
     margin: 0 auto;
     overflow: hidden;
 }

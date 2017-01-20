@@ -29,6 +29,7 @@ const GOAL_RADIUS = 15;
  * 
  * And the following properties representing the state of the level:
  * - `coinsCollected`
+ * - `totalCoins`
  */
 export const buildLevel = (level, engine) => {
     
@@ -73,6 +74,7 @@ export const buildLevel = (level, engine) => {
 
     // The coins
     ret.coinsCollected = 0;
+    ret.totalCoins = level.coins.length;
     bodies.push(...level.coins.map(c => {
         const coin = BodyFactory.circle(c.x, c.y, COIN_RADIUS, { isTrigger: true });
         coin.on('collision', collision => {
