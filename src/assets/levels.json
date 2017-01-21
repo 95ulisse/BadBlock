@@ -1,10 +1,6 @@
 [
     {
         "name": "Instant win",
-        "worldSize" : {
-            "width": 600,
-            "height": 440
-        },
         "stars": [ -1, 0, 1 ],
         "heroPosition": { "x": 100, "y": 100 },
         "goalPosition": { "x": 100, "y": 200 }, 
@@ -14,10 +10,6 @@
     },
     {
         "name": "Slow start",
-        "worldSize" : {
-            "width": 600,
-            "height": 440
-        },
         "stars": [ 3, 4, 5 ],
         "heroPosition": { "x": 100, "y": 100 },
         "goalPosition": { "x": 150, "y": 100 }, 
@@ -27,10 +19,6 @@
     },
     {
         "name": "We are getting greedy",
-        "worldSize" : {
-            "width": 600,
-            "height": 440
-        },
         "stars": [ 10, 12, 15 ],
         "heroPosition": { "x": 100, "y": 100 },
         "goalPosition": { "x": 320, "y": 240 }, 
@@ -59,6 +47,34 @@
             { "x": 500, "y": 440 },
             { "x": 550, "y": 440 },
             { "x": 600, "y": 440 }
+        ]
+    },
+    {
+        "name": "Some walls",
+        "stars": [ -1, 0, 1 ],
+        "heroPosition": { "x": 100, "y": 40 },
+        "goalPosition": { "x": 100, "y": 200 }, 
+        "coins": [
+            { "x": 140, "y": 100 }
+        ],
+        "walls": [
+            [
+                { "x": 30, "y": 150 },
+                { "x": 200, "y": 150 },
+                { "x": 200, "y": 170 },
+                { "x": 30, "y": 170 }
+            ],
+            [
+                { "x": 30, "y": 350 },
+                { "x": 500, "y": 350 },
+                { "x": 500, "y": 370 },
+                { "x": 30, "y": 370 }
+            ],
+            [
+                { "x": 500, "y": 150 },
+                { "x": 500, "y": 370 },
+                { "x": 400, "y": 370 }
+            ]
         ]
     }
 ]

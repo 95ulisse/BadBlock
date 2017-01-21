@@ -2,8 +2,9 @@
  * Set of helpers to manage levels.
  */
 
-import { Body, BodyFactory } from 'phy6-js';
+import { Body, BodyFactory, Vector } from 'phy6-js';
 import EventEmitter from 'eventemitter3';
+import extend from 'extend';
 
 const WALLS_WIDTH = 20;
 const HERO_SIZE = 20;
@@ -37,6 +38,16 @@ const GOAL_RADIUS = 15;
 export const buildLevel = (level, engine) => {
     
     const bodies = engine.bodies;
+
+    // Defaults
+    level = extend({
+        worldSize: {
+            width: 600,
+            height: 440
+        },
+        coins: [],
+        walls: []
+    }, level);
 
     // Creates the EventEmitter that we will return
     const ret = new EventEmitter();
@@ -95,6 +106,19 @@ export const buildLevel = (level, engine) => {
         });
         return coin;
     }))
+
+    // The walls
+    bodies.push(...level.walls.map(w => {
+        const absoluteVertices = w.map(p => new Vector(p.x, p.y));
+        let c = w.reduce((a, b) => [ a[0] + b.x, a[1] + b.y ], [ 0, 0 ]);
+        c = new Vector(c[0] / w.length, c[1] / w.length);
+        const relativeVertices = absoluteVertices.map(x => x.sub(c)); 
+        return new Body({
+            position: c,
+            vertices: relativeVertices,
+            isStatic: true
+        });
+    }));
 
     // Public methods
     ret.computeStars = (shots) => {
