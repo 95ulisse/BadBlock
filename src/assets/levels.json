@@ -51,7 +51,7 @@
     },
     {
         "name": "Some walls",
-        "stars": [ -1, 0, 1 ],
+        "stars": [ 2, 3, 4 ],
         "heroPosition": { "x": 100, "y": 40 },
         "goalPosition": { "x": 100, "y": 200 }, 
         "coins": [

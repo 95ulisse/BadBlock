@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import autobind from 'autobind-decorator';
+import { Timer } from 'phy6-js';
 
 import Timeline from '../../util/Timeline';
 
@@ -23,10 +24,12 @@ export default class IntroAnimation extends Component {
         // Creates a new timeline describing the outro animation
         // and immediately starts it. At the end of the animation,
         // call the event handler.
-        new Timeline()
+        const t = new Timer();
+        t.start();
+        new Timeline([], t)
             .styleTo(_svg, 'opacity', 0, 1000)
             .start()
-            .on('end', () => onPlayClick());
+            .on('end', () => { t.stop(); onPlayClick(); });
     }
 
     render() {

@@ -6,10 +6,13 @@ import { Body, BodyFactory, Vector } from 'phy6-js';
 import EventEmitter from 'eventemitter3';
 import extend from 'extend';
 
+import Timeline from '../util/Timeline';
+import { interpolators } from '../util/Tween';
+
 const WALLS_WIDTH = 20;
 const HERO_SIZE = 20;
-const COIN_RADIUS = 7;
-const GOAL_RADIUS = 15;
+const COIN_RADIUS = 8;
+const GOAL_RADIUS = 24;
 
 /**
  * Transforms the object description of a level in actual bodies for the physics.
@@ -17,6 +20,8 @@ const GOAL_RADIUS = 15;
  * 
  * @param {object} desc - Description of the level to build.
  * @param {Engine} engine - Physics engine that runs the simulation.
+ * @param {Timer} timer - Timer object that will be used for the animations.
+ * @param {AssetManager} assets - AssetManager containing the sprites to use.
  * 
  * @returns {EventEmitter}
  * Returns an object that will fire the following events:
@@ -35,7 +40,7 @@ const GOAL_RADIUS = 15;
  * Also, the following methods are available:
  * - `computeStars(shots)`
  */
-export const buildLevel = (level, engine) => {
+export const buildLevel = (level, engine, timer, assets) => {
     
     const bodies = engine.bodies;
 
@@ -51,6 +56,9 @@ export const buildLevel = (level, engine) => {
 
     // Creates the EventEmitter that we will return
     const ret = new EventEmitter();
+
+    // Creates the Timeline object that will animate sprite frames
+    ret.timeline = new Timeline([], timer);
 
     // First of all, create the cage that represents our world bounds
     bodies.push(...BodyFactory.cage(
@@ -85,12 +93,42 @@ export const buildLevel = (level, engine) => {
             ret.emit('won');
         }
     });
+    goal.render = {
+        image: assets.getImage('goal'),
+        width: 48,
+        height: 48,
+        sx: 0,
+        sy: 0,
+        dx: -GOAL_RADIUS / 2 - 12,
+        dy: -GOAL_RADIUS / 2 - 12
+    };
+    ret.timeline.animateTo(goal.render, 'sx', 48 * 5, 700, {
+        loop: 'loop',
+        interpolator: interpolators.steps(48)
+    });
 
     // The coins
     ret.coinsCollected = 0;
     ret.totalCoins = level.coins.length;
     bodies.push(...level.coins.map(c => {
         const coin = BodyFactory.circle(c.x, c.y, COIN_RADIUS, { isTrigger: true });
+
+        // Sprite animation
+        coin.render = {
+            image: assets.getImage('coin'),
+            width: 32,
+            height: 32,
+            sx: 0,
+            sy: 0,
+            dx: -COIN_RADIUS / 2 - 12,
+            dy: -COIN_RADIUS / 2 - 12
+        };
+        ret.timeline.animateTo(coin.render, 'sx', 32 * 8, 1000, {
+            loop: 'loop',
+            interpolator: interpolators.steps(32)
+        });
+
+        // Collision event
         coin.on('collision', collision => {
             if (collision.body1 === hero || collision.body2 === hero) {
                 bodies.splice(bodies.indexOf(coin), 1);
@@ -104,6 +142,7 @@ export const buildLevel = (level, engine) => {
 
             }
         });
+
         return coin;
     }))
 
@@ -120,7 +159,13 @@ export const buildLevel = (level, engine) => {
         });
     }));
 
+    // Starts the timeline
+    ret.timeline.start();
+
     // Public methods
+
+    // Returns the number of stars to assign if the user completed the level
+    // with the given number of shots.
     ret.computeStars = (shots) => {
         for (let i = 0; i < level.stars.length; i++) {
             if (shots <= level.stars[i]) {
@@ -128,6 +173,11 @@ export const buildLevel = (level, engine) => {
             }
         }
         return 0;
+    };
+
+    // Removes any internal event handler that this level might have.
+    ret.stop = () => {
+        ret.timeline.stop();
     };
 
     return ret;

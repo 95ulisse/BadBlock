@@ -14,8 +14,9 @@ export default class Timeline extends EventEmitter {
      * Constructs a new timeline with the given tweens.
      * 
      * @param {Tween[]} tweens - Initial tweens to add to the timeline.
+     * @param {Timer} timer - Timer used to control the timeline.
      */
-    constructor(tweens = []) {
+    constructor(tweens = [], timer) {
         super();
         
         // Properties
@@ -24,22 +25,10 @@ export default class Timeline extends EventEmitter {
         this.time = 0;
         this.ended = false; 
         this._delay = 0;
+        this._timer = timer;
 
         // Adds the starting tweens
         tweens.forEach(this.add.bind(this));
-
-        // Create a new timer and advance all the tweens at every tick
-        this._timer = new Timer({ fps: 60, isFixed: true });
-        this._timer.on('tick', ({ delta }) => {
-            this.time += delta;
-            this.tweens.forEach(t => {
-                if (!t.ended) {
-                    this.ended = false;
-                    t.update(delta);
-                }
-            });
-        });
-
     }
 
     /**
@@ -48,7 +37,18 @@ export default class Timeline extends EventEmitter {
      * @returns Returns `this` for chaining.
      */
     start() {
-        this._timer.start();
+
+        this._timerListener = ({ delta }) => {
+            this.time += delta;
+            this.tweens.forEach(t => {
+                if (!t.ended) {
+                    this.ended = false;
+                    t.update(delta);
+                }
+            });
+        };
+        this._timer.on('tick', this._timerListener);
+
         this.isRunning = true;
         return this;
     }
@@ -60,7 +60,7 @@ export default class Timeline extends EventEmitter {
      */
     stop() {
         this.isRunning = false;
-        this._timer.stop();
+        this._timer.removeListener('tick', this._timerListener);
         return this;
     }
 

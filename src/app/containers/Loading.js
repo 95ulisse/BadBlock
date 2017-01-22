@@ -1,28 +1,31 @@
 import React, { Component, PropTypes } from 'react';
 
 import { connect } from '../../util/state';
-import { goToIntro, goToError } from '../actions/app';
+import { loadAssets, goToIntro, goToError } from '../actions/app';
 import { updateLevels } from '../actions/levels';
 
 @connect(
     state => ({}),
     dispatch => ({
+        loadAssets: () => dispatch(loadAssets()),
         updateLevels: () => dispatch(updateLevels()),
         goToIntro: () => dispatch(goToIntro()),
-        goToError: () => dispatch(goToError())
+        goToError: (e) => dispatch(goToError(e))
     })
 )
 export default class Loading extends Component {
 
     static propTypes = {
+        loadAssets: PropTypes.func.isRequired,
         updateLevels: PropTypes.func.isRequired,
         goToIntro: PropTypes.func.isRequired,
         goToError: PropTypes.func.isRequired
     };
 
     componentDidMount() {
-        const { updateLevels, goToIntro, goToError } = this.props;
-        updateLevels()
+        const { loadAssets, updateLevels, goToIntro, goToError } = this.props;
+        loadAssets()
+            .then(updateLevels)
             .then(goToIntro)
             .catch(goToError);
     }

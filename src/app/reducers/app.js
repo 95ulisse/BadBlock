@@ -1,8 +1,14 @@
 export default (state, action) => {
     if (!state) {
-        return { stage: 'loading', currentLevel: -1 };
+        return { assets: null, stage: 'loading', currentLevel: -1 };
     }
     switch (action.type) {
+
+        case 'LOAD_ASSETS':
+            return {
+                ...state,
+                assets: action.payload
+            };
 
         case 'GO_TO_INTRO':
             return {

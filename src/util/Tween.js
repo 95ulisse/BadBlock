@@ -21,7 +21,8 @@ const noop = () => {};
  * An interpolator function has 3 args: startValue, endValue and normalized time.
  */
 export const interpolators = {
-    number: (s, e, t) => s + t * (e - s) 
+    number: (s, e, t) => s + t * (e - s),
+    steps : (size) => (s, e, t) => Math.floor(s + t * (e - s) / size) * size
 };
 
 /**

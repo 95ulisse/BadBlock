@@ -4,6 +4,7 @@ import autobind from 'autobind-decorator';
 
 import { connect } from '../../util/state';
 import * as LevelHelpers from '../../util/level';
+import AssetManager from '../../util/AssetManager';
 
 import ChangeAnimation from '../components/ChangeAnimation';
 import LevelCompletedModal from '../components/LevelCompletedModal';
@@ -11,11 +12,13 @@ import LevelCompletedModal from '../components/LevelCompletedModal';
 import styles from './Level.scss';
 
 @connect(state => ({
+    assets: state.app.assets,
     level: state.levels.allLevels[state.app.currentLevel]
 }))
 export default class Level extends Component {
 
     static propTypes = {
+        assets: PropTypes.instanceOf(AssetManager).isRequired,
         level: PropTypes.object.isRequired
     };
 
@@ -29,7 +32,7 @@ export default class Level extends Component {
 
         // These objects reside of the state because they will never change
         this.engine = new Engine();
-        this.timer = new Timer();
+        this.timer = new Timer({ fps: 60, isFixed: true });
 
         // Update the physics at every tick
         this.timer.on('tick', this.engine.update.bind(this.engine));
@@ -52,7 +55,7 @@ export default class Level extends Component {
     buildLevel(levelDescription = this.props.level) {
         
         // Builds the level
-        this.level = LevelHelpers.buildLevel(levelDescription, this.engine);
+        this.level = LevelHelpers.buildLevel(levelDescription, this.engine, this.timer, this.props.assets);
 
         // Registers callbacks for the events of our interest
         this.level.on('won', () => this.changeState('won'));
@@ -72,6 +75,7 @@ export default class Level extends Component {
         
         // Clean the engine, stop the timer, reset everything of the previous level
         if (this.level) {
+            this.level.stop();
             this.level.removeAllListeners();
             this.engine.bodies.length = 0;
             this.changeState('beforeStart');
@@ -117,7 +121,9 @@ export default class Level extends Component {
     onCanvasRef(canvas) {
         if (canvas) {
             this.canvas = canvas;
-            this.renderer = new Renderer(this.engine, canvas);
+            this.renderer = new Renderer(this.engine, canvas, {
+                showAxes: false
+            });
             this.renderer.start();
             this.renderer.render();
         } else {
