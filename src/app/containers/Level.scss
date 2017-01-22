@@ -11,21 +11,30 @@
 
     .top-bar {
         position: relative;
+        text-align: center;
         @include clearfix();
 
         .stat {
             font-size: 25px;
+            display: inline-block;
 
             // First child on the left
             &:first-child {
                 float: left;
-                margin-left: 25px;
+                margin: 0 0 0 25px;
             }
 
-            // Second child on the right
+            // Middle child centered
+            &:nth-child(2) {
+                position: absolute;
+                left: 0;
+                right: 0;
+            }
+
+            // Last child on the right
             &:last-child {
                 float: right;
-                margin-right: 25px;
+                margin: 0 25px 0 0;
             }
 
             & > * {
@@ -34,6 +43,16 @@
 
             div {
                 font-weight: bold;
+            }
+
+            // Pointer cursor and animation on hover for icons
+            :global {
+                .fa {
+                    cursor: pointer;
+                    &:hover {
+                        animation: fa-spin 2s infinite linear;
+                    }
+                }
             }
         }
     }

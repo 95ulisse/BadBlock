@@ -7,9 +7,13 @@ import * as LevelHelpers from '../../util/level';
 import AssetManager from '../../util/AssetManager';
 
 import ChangeAnimation from '../components/ChangeAnimation';
+import Stars from '../components/Stars';
 import LevelCompletedModal from '../components/LevelCompletedModal';
 
 import styles from './Level.scss';
+
+const starsComparer = (current, candidate) =>
+    current.props.stars != candidate.props.stars;
 
 @connect(state => ({
     assets: state.app.assets,
@@ -211,8 +215,15 @@ export default class Level extends Component {
                     <span>/{level.totalCoins}</span>
                 </span>
                 <span className={styles['stat']}>
+                    <i className="fa fa-refresh" onClick={this.replayLevel} />
+                </span>
+                <span className={styles['stat']}>
                     <span>Shots:&nbsp;</span>
                     <ChangeAnimation>{shots}</ChangeAnimation>
+                    <ChangeAnimation hasChanged={starsComparer}>
+                        <Stars stars={level.computeStars(shots)} maxStars={3} size={25}
+                            style={{ marginLeft: '5px' }} />
+                    </ChangeAnimation>
                 </span>
             </div>
         );

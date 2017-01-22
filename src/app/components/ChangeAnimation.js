@@ -8,7 +8,12 @@ import styles from './ChangeAnimation.scss';
 export default class ChangeAnimation extends Component {
 
     static propTypes = {
-        children: PropTypes.node
+        children: PropTypes.node,
+        hasChanged: PropTypes.func.isRequired
+    };
+
+    static defaultProps = {
+        hasChanged: () => true
     };
 
     constructor(props) {
@@ -46,9 +51,14 @@ export default class ChangeAnimation extends Component {
     componentWillReceiveProps(nextProps) {
         if (this.props.children != nextProps.children) {
 
-            // We push the new content to the queue and start the timer
-            this.queue.push(nextProps.children);
-            this._startTimer();
+            // Let the custom user function decide whether the content changed or not
+            if (this.props.hasChanged(this.props.children, nextProps.children)) {
+
+                // We push the new content to the queue and start the timer
+                this.queue.push(nextProps.children);
+                this._startTimer();
+
+            }
 
         }
     }
@@ -63,7 +73,7 @@ export default class ChangeAnimation extends Component {
     render() {
         // Note that the content is taken from the state
         const { current, next, flip } = this.state;
-        const { className, ...otherProps } = this.props;
+        const { className, hasChanged, ...otherProps } = this.props;
 
         // Swaps in and out classes
         const cssIn = flip ? styles['out'] : styles['in'];
