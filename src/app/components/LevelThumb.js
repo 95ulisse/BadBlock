@@ -34,6 +34,7 @@ export default class LevelThumb extends Component {
         return (
             <div className={styles['level-thumb'] + inClass} onClick={onClick}>
                 <span>{level.name}</span>
+                <img src={level.thumb} />
             </div>
         );
     }

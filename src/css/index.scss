@@ -4,11 +4,12 @@ body {
     background-color: $background-color;
     font-family: $font-family;
     color: $text-color;
+    cursor: default;
 }
 
 * {
     user-select: none;
-    cursor: default;
+    cursor: inherit;
 }
 
 :global(#game-area) {
