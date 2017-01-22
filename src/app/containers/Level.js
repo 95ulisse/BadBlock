@@ -8,7 +8,7 @@ import AssetManager from '../../util/AssetManager';
 
 import ChangeAnimation from '../components/ChangeAnimation';
 import Stars from '../components/Stars';
-import LevelCompletedModal from '../components/LevelCompletedModal';
+import LevelModal from '../components/LevelModal';
 
 import styles from './Level.scss';
 
@@ -194,10 +194,15 @@ export default class Level extends Component {
                 break;
             
             case 'paused':
+                modal = (
+                    <LevelModal reason="paused" level={level}
+                        replayLevel={this.replayLevel}
+                        resumeLevel={() => this.changeState('playing')} />
+                );
                 break;
             
             case 'won':
-                modal = <LevelCompletedModal level={level} shots={shots} replayLevel={this.replayLevel} />;
+                modal = <LevelModal reason="won" level={level} shots={shots} replayLevel={this.replayLevel} />;
                 break;
             
             case 'lost':
@@ -215,7 +220,9 @@ export default class Level extends Component {
                     <span>/{level.totalCoins}</span>
                 </span>
                 <span className={styles['stat']}>
-                    <i className="fa fa-refresh" onClick={this.replayLevel} />
+                    {state === 'playing' &&
+                        <i className="fa fa-fw fa-pause" onClick={() => this.changeState('paused')} />
+                    }
                 </span>
                 <span className={styles['stat']}>
                     <span>Shots:&nbsp;</span>

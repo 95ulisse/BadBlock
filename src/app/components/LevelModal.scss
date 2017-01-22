@@ -13,6 +13,15 @@
     h1 {
         margin: 0 0 -20px 0;
         text-align: center;
+
+        // When the heading is followed directly by the buttons,
+        // add some space
+        & + button {
+            margin-top: 130px;
+        }
+        & + button + button {
+            margin-top: 130px;
+        }
     }
 
     :global(.btn) {

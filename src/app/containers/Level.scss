@@ -49,8 +49,10 @@
             :global {
                 .fa {
                     cursor: pointer;
+                    transform: scale(1);
+                    transition: transform 100ms ease-out;
                     &:hover {
-                        animation: fa-spin 2s infinite linear;
+                        transform: scale(1.2);
                     }
                 }
             }
