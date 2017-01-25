@@ -7,6 +7,8 @@ import App from './app/App';
 
 import styles from './css/index.scss';
 
+import 'isomorphic-fetch';
+
 // Creates the global store
 const store = createStore(rootReducer, [ thunkMiddleware, loggerMiddleware ]);
 
