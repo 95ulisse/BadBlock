@@ -67,7 +67,12 @@ export const buildLevel = (level, engine, timer, assets) => {
         level.worldSize.width + 2 * WALLS_WIDTH,
         level.worldSize.height + 2 * WALLS_WIDTH,
         WALLS_WIDTH,
-        { isStatic: true }
+        {
+            isStatic: true,
+            render: {
+                pattern: assets.getImage('wall')
+            }
+        }
     ));
 
     // The hero
@@ -75,7 +80,12 @@ export const buildLevel = (level, engine, timer, assets) => {
         level.heroPosition.x - HERO_SIZE / 2,
         level.heroPosition.y - HERO_SIZE / 2,
         HERO_SIZE,
-        HERO_SIZE
+        HERO_SIZE,
+        {
+            render: {
+                showAxes: true
+            }
+        }
     );
     ret.hero = hero;
     bodies.push(hero);
@@ -94,6 +104,7 @@ export const buildLevel = (level, engine, timer, assets) => {
         }
     });
     goal.render = {
+        showWireframe: false,
         image: assets.getImage('goal'),
         width: 48,
         height: 48,
@@ -115,6 +126,7 @@ export const buildLevel = (level, engine, timer, assets) => {
 
         // Sprite animation
         coin.render = {
+            showWireframe: false,
             image: assets.getImage('coin'),
             width: 32,
             height: 32,
@@ -155,7 +167,10 @@ export const buildLevel = (level, engine, timer, assets) => {
         return new Body({
             position: c,
             vertices: relativeVertices,
-            isStatic: true
+            isStatic: true,
+            render: {
+                pattern: assets.getImage('wall')
+            }
         });
     }));
 
