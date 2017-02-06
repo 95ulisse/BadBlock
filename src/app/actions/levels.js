@@ -27,7 +27,7 @@ export const generateThumbs = () => (dispatch, getState) => {
     // Cycles all the levels and renders each of them in the canvas
     const thumbs = [];
     for (const l of allLevels) {
-        const level = LevelHelpers.buildLevel(l, engine, timer, assets);
+        const level = LevelHelpers.buildLevel(l, engine, timer, assets, []);
         renderer.render();
         thumbs.push(canvas.toDataURL('image/png'));
         level.stop();

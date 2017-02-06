@@ -55,6 +55,7 @@ export default class Tween extends EventEmitter {
             startTime: 0,
             loop: 'single',
             loopTimes: Infinity,
+            loopDelay: 0,
             easing: eases.linear,
             interpolator: interpolators.number
         }, options);
@@ -62,46 +63,6 @@ export default class Tween extends EventEmitter {
         this._absoluteTime = 0;
         this._lastValue = null;
         this.ended = false;
-    }
-
-    startValue(v) {
-        this.startValue = v;
-        return this;
-    }
-
-    endValue(v) {
-        this.endValue = v;
-        return this;
-    }
-
-    duration(v) {
-        this.duration = v;
-        return this;
-    }
-
-    startTime(v) {
-        this.startTime = v;
-        return this;
-    }
-
-    loop(v) {
-        this.loop = v;
-        return this;
-    }
-
-    loopTimes(v) {
-        this.loopTimes = v;
-        return this;
-    }
-
-    easing(v) {
-        this.easing = v;
-        return this;
-    }
-
-    interpolator(v) {
-        this.interpolator = v;
-        return this;
     }
 
     /**
@@ -119,6 +80,7 @@ export default class Tween extends EventEmitter {
             startTime,
             loop,
             loopTimes,
+            loopDelay,
             easing,
             interpolator
         } = this;
@@ -162,8 +124,8 @@ export default class Tween extends EventEmitter {
              * infinite sequence of segments, and loops repeated a finite number
              * times are just a sequence of segments.
              */
-            const segmentIndex = Math.floor(t / duration);
-            const valueInSegment = (t % duration) / duration;
+            const segmentIndex = Math.floor(t / (duration + loopDelay));
+            const valueInSegment = Math.min((t % (duration + loopDelay)) / duration, 1);
 
             switch (loop) {
                 

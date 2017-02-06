@@ -9,10 +9,13 @@ import extend from 'extend';
 import Timeline from '../util/Timeline';
 import { interpolators } from '../util/Tween';
 
+import CircleParticle from '../app/particles/CircleParticle';
+
 const WALLS_WIDTH = 20;
 const HERO_SIZE = 20;
 const COIN_RADIUS = 8;
 const GOAL_RADIUS = 24;
+const SPIKES_WIDTH = 12;
 
 /**
  * Transforms the object description of a level in actual bodies for the physics.
@@ -22,6 +25,7 @@ const GOAL_RADIUS = 24;
  * @param {Engine} engine - Physics engine that runs the simulation.
  * @param {Timer} timer - Timer object that will be used for the animations.
  * @param {AssetManager} assets - AssetManager containing the sprites to use.
+ * @param {Particle[]} particles - Array that will be populates with the particles needed for the level.
  * 
  * @returns {EventEmitter}
  * Returns an object that will fire the following events:
@@ -40,7 +44,7 @@ const GOAL_RADIUS = 24;
  * Also, the following methods are available:
  * - `computeStars(shots)`
  */
-export const buildLevel = (level, engine, timer, assets) => {
+export const buildLevel = (level, engine, timer, assets, particles) => {
     
     const bodies = engine.bodies;
 
@@ -51,7 +55,8 @@ export const buildLevel = (level, engine, timer, assets) => {
             height: 440
         },
         coins: [],
-        walls: []
+        walls: [],
+        spikes: []
     }, level);
 
     // Creates the EventEmitter that we will return
@@ -98,8 +103,11 @@ export const buildLevel = (level, engine, timer, assets) => {
         { isTrigger: true }
     );
     ret.goal = goal;
+    const goalParticle = new CircleParticle(ret.timeline, goal.position, '#06c');
     goal.on('collision', collision => {
         if (collision.body1 === hero || collision.body2 === hero) {
+            particles.splice(particles.indexOf(goalParticle), 1);
+            goalParticle.stop();
             ret.emit('won');
         }
     });
@@ -140,23 +148,71 @@ export const buildLevel = (level, engine, timer, assets) => {
             interpolator: interpolators.steps(32)
         });
 
+        // Coin particle
+        const particle = new CircleParticle(ret.timeline, coin.position, 'yellow');
+        particles.push(particle);
+
         // Collision event
         coin.on('collision', collision => {
             if (collision.body1 === hero || collision.body2 === hero) {
                 bodies.splice(bodies.indexOf(coin), 1);
+                particles.splice(particles.indexOf(particle), 1);
+                particle.stop();
                 ret.coinsCollected++;
                 ret.emit('coinCollected', coin);
 
                 // Add the goal to the world if all the coins have been collected
                 if (ret.coinsCollected === level.coins.length) {
                     bodies.push(goal);
+                    particles.push(goalParticle);
                 }
 
             }
         });
 
         return coin;
-    }))
+    }));
+
+    // The spikes
+    bodies.push(...level.spikes.map(s => {
+        
+        // Computes the angle of the spike line
+        let angle = 0;
+        if (s.x2 - s.x1 === 0) {
+            angle = Math.PI / 2;
+        } else {
+            angle = Math.atan((s.y2 - s.y1) / (s.x2 - s.x1));
+        }
+        if (s.flip) {
+             angle += Math.PI;
+        }
+
+        // Creates the spike body
+        const spike = BodyFactory.line(s.x1, s.y1, s.x2, s.y2, SPIKES_WIDTH, !!s.flip, {
+            isTrigger: true,
+            render: {
+                draw: (context, _, __, helpers) => {
+                    helpers.drawHull();
+
+                    // The spikes need to be rotated to match the orientation of the line
+                    context.fillStyle = context.createPattern(assets.getImage('spikes'), 'repeat');
+                    context.save();
+                    context.translate(s.x1, s.y1);
+                    context.rotate(angle);
+                    context.fill();
+                    context.restore();
+
+                }
+            }
+        });
+        spike.on('collision', (collision) => {
+            if (collision.body1 === hero || collision.body2 === hero) {
+                ret.emit('lost');
+            }
+        });
+        return spike;
+
+    }));
 
     // The walls
     bodies.push(...level.walls.map(w => {
@@ -178,6 +234,21 @@ export const buildLevel = (level, engine, timer, assets) => {
     ret.timeline.start();
 
     // Public methods
+
+    // Hits the hero from the given point
+    ret.shot = (point) => {
+
+        // Computes the force to apply along the direction
+        // connecting the point and the center of the body.
+        const force =
+            hero.position.sub(point)
+            .normalize()
+            .scalar(0.02);
+
+        // Applies a force to the hero to make it move
+        hero.applyForce(force, hero.position);
+
+    };
 
     // Returns the number of stars to assign if the user completed the level
     // with the given number of shots.

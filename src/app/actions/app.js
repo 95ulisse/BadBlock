@@ -10,7 +10,8 @@ export const loadAssets = () => dispatch => {
         .queueImages({
             coin: '/assets/coin.png',
             goal: '/assets/goal.png',
-            wall: '/assets/wall.png'
+            wall: '/assets/wall.png',
+            spikes: '/assets/spikes.png'
         })
         .downloadAll()
         .then(manager => dispatch({ type: 'LOAD_ASSETS', payload: manager }));

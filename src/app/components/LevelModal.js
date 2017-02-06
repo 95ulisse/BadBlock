@@ -20,7 +20,7 @@ import styles from './LevelModal.scss';
 export default class LevelModal extends Component {
 
     static propTypes = {
-        reason: PropTypes.oneOf([ 'paused', 'won' ]).isRequired,
+        reason: PropTypes.oneOf([ 'paused', 'won', 'lost' ]).isRequired,
         level: PropTypes.object.isRequired,
         shots: PropTypes.number,
         replayLevel: PropTypes.func.isRequired,
@@ -62,6 +62,10 @@ export default class LevelModal extends Component {
                 }
                 break;
 
+            case 'lost':
+                title = 'You lost!';
+                break;
+
         }
 
         return (
@@ -93,8 +97,21 @@ export default class LevelModal extends Component {
                         <i className="fa fa-fw fa-play" /> Resume
                     </button>
                 }
-                <div style={{ clear: 'both' }} />
-                <button className="btn" style={{ display: 'block', margin: '15px auto 0 auto' }} onClick={goToLevelSelect}>
+                {(showNext || showResume) &&
+                    <div style={{ clear: 'both' }} />
+                }
+                <button className="btn"
+                    style={{
+                        display: 'block',
+                        ...(
+                            (showNext || showResume) ? {
+                                margin: '15px auto 0 auto'
+                            } : {
+                                float: 'right'
+                            }
+                        )
+                    }}
+                    onClick={goToLevelSelect}>
                     <i className="fa fa-fw fa-list-ul" /> Level select
                 </button>
 

@@ -12,8 +12,31 @@ import LevelModal from '../components/LevelModal';
 
 import styles from './Level.scss';
 
+
+
 const starsComparer = (current, candidate) =>
     current.props.stars != candidate.props.stars;
+
+const relativizeMouseEvent = (e) => {
+    
+    // We need to relativize the coordinates, so we traverse the hierarchy
+    // to compute the total offset of the element from the document
+    let offsetX = 0;
+    let offsetY = 0;
+    let parent = e.target;
+    while (parent) {
+        offsetX += parent.offsetLeft;
+        offsetY += parent.offsetTop;
+        parent = parent.offsetParent;
+    }
+    return new Vector(
+        e.pageX - offsetX,
+        e.pageY - offsetY
+    );
+
+};
+
+
 
 @connect(state => ({
     assets: state.app.assets,
@@ -59,7 +82,8 @@ export default class Level extends Component {
     buildLevel(levelDescription = this.props.level) {
         
         // Builds the level
-        this.level = LevelHelpers.buildLevel(levelDescription, this.engine, this.timer, this.props.assets);
+        this.particles = [];
+        this.level = LevelHelpers.buildLevel(levelDescription, this.engine, this.timer, this.props.assets, this.particles);
 
         // Registers callbacks for the events of our interest
         this.level.on('won', () => this.changeState('won'));
@@ -107,6 +131,7 @@ export default class Level extends Component {
             case 'won':
             case 'lost':
                 this.timer.stop();
+                this.mousePos = null;
                 break;
 
         }
@@ -126,8 +151,10 @@ export default class Level extends Component {
         if (canvas) {
             this.canvas = canvas;
             this.renderer = new Renderer(this.engine, canvas, {
-                showAxes: false
+                showAxes: false,
+                showVelocities: false
             });
+            this.renderer.on('frameDrawn', this.onFrameDrawn);
             this.renderer.start();
             this.renderer.render();
         } else {
@@ -137,41 +164,82 @@ export default class Level extends Component {
     }
 
     @autobind
+    onCanvasMouseMove(e) {
+
+        if (this.state.state != 'playing') {
+            return;
+        }
+
+        // Update the position of the mouse.
+        // At the next tick of the timer, the particles will be redrawn.
+        this.mousePos = relativizeMouseEvent(e);
+
+    }
+
+    @autobind
     onCanvasMouseDown(e) {
-        const hero = this.level.hero;
         const { state, shots } = this.state;
 
         if (state != 'playing') {
             return;
         }
 
-        // We need to relativize the coordinates, so we traverse the hierarchy
-        // to compute the total offset of the element from the document
-        let offsetX = 0;
-        let offsetY = 0;
-        let parent = e.target;
-        while (parent) {
-            offsetX += parent.offsetLeft;
-            offsetY += parent.offsetTop;
-            parent = parent.offsetParent;
-        }
-        const point = new Vector(
-            e.pageX - offsetX,
-            e.pageY - offsetY
-        );
-
-        // Computes the force to apply along the direction
-        // connecting the mouse and the center of the body.
-        const force =
-            hero.position.sub(point)
-            .normalize()
-            .scalar(0.02);
-
-        // Applies a force to the hero to make it move
-        hero.applyForce(force, hero.position);
+        // Hit that block!
+        this.level.shot(relativizeMouseEvent(e));
 
         // Increment the shots count
         this.setState({ shots: shots + 1 });
+
+    }
+
+    @autobind
+    onFrameDrawn(context) {
+        const { mousePos, particles, level: { hero } } = this;        
+        
+        // Enable additive blending.
+        // Particles do not have to completely cover what was previously drawn.
+        context.globalCompositeOperation = 'lighter';
+        context.globalAlpha = 0.5;
+
+        if (mousePos) {
+            const angleToDraw = Math.PI / 8;
+            const r = mousePos.sub(hero.position);
+            const beginAngle = r.direction() - (angleToDraw / 2) + (r.x < 0 ? Math.PI : 0);
+            const endAngle = beginAngle + angleToDraw;
+
+            // Cursor particles
+            context.beginPath();
+            context.arc(hero.position.x, hero.position.y, r.length(), beginAngle, endAngle);
+            context.moveTo(mousePos.x, mousePos.y);
+            context.lineTo(hero.position.x, hero.position.y);
+
+            context.strokeStyle = 'white';
+            context.lineCap = 'round';
+            context.lineWidth = 5;
+            context.stroke();
+
+            // Direction prediction
+            const prediction = r.normalize().scalar(-100).add(hero.position);
+            context.beginPath();
+            context.moveTo(hero.position.x, hero.position.y);
+            context.lineTo(prediction.x, prediction.y);
+
+            context.strokeStyle = 'blue';
+            context.lineCap = 'butt';
+            context.lineWidth = 3;
+            context.setLineDash([ 10, 10 ]);
+            context.stroke();
+            context.setLineDash([]);
+
+        }
+
+        // Draw other particles
+        for (const p of particles) {
+            p.render(context);
+        }
+
+        // And now restore the state of the context
+        context.globalAlpha = 1;
 
     }
 
@@ -206,7 +274,7 @@ export default class Level extends Component {
                 break;
             
             case 'lost':
-                modal = <button className="btn">You Lost :(</button>;
+                modal = <LevelModal reason="lost" level={level} replayLevel={this.replayLevel} />;
                 break;
             
         }
@@ -247,7 +315,8 @@ export default class Level extends Component {
 
                     {/* Game canvas */}
                     <canvas width="640" height="480" className={modal ? styles['blurred'] : ''}
-                        ref={this.onCanvasRef} onMouseDown={this.onCanvasMouseDown}>
+                        ref={this.onCanvasRef} onMouseDown={this.onCanvasMouseDown}
+                        onMouseMove={this.onCanvasMouseMove}>
                     </canvas>
 
                     {/* Modal messages that will apear above the game */}
