@@ -116,6 +116,7 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
     goal.render = {
         showWireframe: false,
         image: assets.getImage('goal'),
+        alpha: 0.1,
         width: 48,
         height: 48,
         sx: 0,
@@ -177,9 +178,17 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
 
                 // Add the goal to the world if all the coins have been collected
                 if (ret.coinsCollected === level.coins.length) {
+                    
+                    // Add the goal to the world
                     bodies.push(goal);
                     particles.push(goalParticle);
+
+                    // But let it enter slowly
+                    ret.timeline.animateTo(goal.render, 'alpha', 1, 300);
+
+                    // Play the sound
                     assets.playSound('goal');
+
                 }
 
             }
