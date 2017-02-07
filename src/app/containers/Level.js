@@ -5,6 +5,7 @@ import autobind from 'autobind-decorator';
 import { connect } from '../../util/state';
 import * as LevelHelpers from '../../util/level';
 import AssetManager from '../../util/AssetManager';
+import { interpolators } from '../../util/Tween';
 
 import ChangeAnimation from '../components/ChangeAnimation';
 import Stars from '../components/Stars';
@@ -218,13 +219,19 @@ export default class Level extends Component {
             context.lineWidth = 5;
             context.stroke();
 
-            // Direction prediction
-            const prediction = r.normalize().scalar(-100).add(hero.position);
+            // Direction prediction.
+            // The prediction should be proportional to the strength of the shot.
+            const predictionLength = Math.min(200, 100 * 200 * (1 / r.length()));
+            const prediction = r.normalize().scalar(-predictionLength).add(hero.position);
             context.beginPath();
             context.moveTo(hero.position.x, hero.position.y);
             context.lineTo(prediction.x, prediction.y);
 
-            context.strokeStyle = 'blue';
+            context.strokeStyle = interpolators.hsl(
+                { h: 120, s: 1, l: 0.5 },
+                { h: 0, s: 1, l: 0.5 },
+                predictionLength / 200
+            );
             context.lineCap = 'butt';
             context.lineWidth = 3;
             context.setLineDash([ 10, 10 ]);

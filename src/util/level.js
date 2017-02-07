@@ -265,10 +265,11 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
 
         // Computes the force to apply along the direction
         // connecting the point and the center of the body.
+        // The closer the point is, the harder the hero gets shot.
+        const distance = hero.position.sub(point);
         const force =
-            hero.position.sub(point)
-            .normalize()
-            .scalar(0.02);
+            distance.normalize()
+            .scalar(Math.min(0.02, 3 * 1 / distance.length()));
 
         // Applies a force to the hero to make it move
         hero.applyForce(force, hero.position);

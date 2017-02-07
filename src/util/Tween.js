@@ -22,7 +22,13 @@ const noop = () => {};
  */
 export const interpolators = {
     number: (s, e, t) => s + t * (e - s),
-    steps : (size) => (s, e, t) => Math.floor(s + t * (e - s) / size) * size
+    steps : (size) => (s, e, t) => Math.floor(s + t * (e - s) / size) * size,
+    hsl: (start, end, t) => {
+        const h = interpolators.number(start.h, end.h, t);
+        const s = interpolators.number(start.s, end.s, t);
+        const l = interpolators.number(start.l, end.l, t);
+        return `hsl(${h}, ${s * 100}%, ${l * 100}%)`;
+    }
 };
 
 /**
