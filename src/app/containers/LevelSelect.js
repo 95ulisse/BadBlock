@@ -23,8 +23,9 @@ export default class LevelSelect extends Component {
         const { levels, goToLevel } = this.props;
         return (
             <div>
+                <h1 style={{ margin: '0.5em 0' }}>Choose level</h1>
                 {levels.map((l, i) =>
-                    <LevelThumb key={i} level={l} entranceDelay={i * 100}
+                    <LevelThumb key={i} level={l} number={i + 1} entranceDelay={i * 100}
                         onClick={goToLevel.bind(null, i)} />
                 )}
             </div>
