@@ -10,6 +10,7 @@ import Timeline from '../util/Timeline';
 import { interpolators } from '../util/Tween';
 
 import CircleParticle from '../app/particles/CircleParticle';
+import FadingCoinParticle from '../app/particles/FadingCoinParticle';
 
 const WALLS_WIDTH = 20;
 const HERO_SIZE = 20;
@@ -164,6 +165,11 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
                 
                 // Play the sound fx
                 assets.playSound('coin');
+
+                // Fading coin particle (used when the coin is collected)
+                const fadeParticle = new FadingCoinParticle(ret.timeline, coin);
+                particles.push(fadeParticle);
+                fadeParticle.on('end', () => particles.splice(particles.indexOf(fadeParticle), 1));
 
                 // Rise the event
                 ret.coinsCollected++;

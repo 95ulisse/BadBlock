@@ -40,6 +40,7 @@ export default class Timeline extends EventEmitter {
 
         this._timerListener = ({ delta }) => {
             this.time += delta;
+            this._delay = 0;
             this.tweens.forEach(t => {
                 if (!t.ended) {
                     this.ended = false;
