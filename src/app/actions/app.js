@@ -13,6 +13,17 @@ export const loadAssets = () => dispatch => {
             wall: '/assets/wall.png',
             spikes: '/assets/spikes.png'
         })
+        .queueSounds({
+            coin: '/assets/coin.mp3',
+            goal: '/assets/goal.mp3',
+            hit1: '/assets/hit1.mp3',
+            hit2: '/assets/hit2.mp3',
+            hit3: '/assets/hit3.mp3',
+            hit4: '/assets/hit4.mp3',
+            hit5: '/assets/hit5.mp3',
+            spikes: '/assets/spikes.mp3',
+            win: '/assets/win.mp3'
+        })
         .downloadAll()
         .then(manager => dispatch({ type: 'LOAD_ASSETS', payload: manager }));
 };

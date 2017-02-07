@@ -108,6 +108,7 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
         if (collision.body1 === hero || collision.body2 === hero) {
             particles.splice(particles.indexOf(goalParticle), 1);
             goalParticle.stop();
+            assets.playSound('win');
             ret.emit('won');
         }
     });
@@ -155,9 +156,16 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
         // Collision event
         coin.on('collision', collision => {
             if (collision.body1 === hero || collision.body2 === hero) {
+                
+                // Remove the coin and stop the particle
                 bodies.splice(bodies.indexOf(coin), 1);
                 particles.splice(particles.indexOf(particle), 1);
                 particle.stop();
+                
+                // Play the sound fx
+                assets.playSound('coin');
+
+                // Rise the event
                 ret.coinsCollected++;
                 ret.emit('coinCollected', coin);
 
@@ -165,6 +173,7 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
                 if (ret.coinsCollected === level.coins.length) {
                     bodies.push(goal);
                     particles.push(goalParticle);
+                    assets.playSound('goal');
                 }
 
             }
@@ -207,6 +216,7 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
         });
         spike.on('collision', (collision) => {
             if (collision.body1 === hero || collision.body2 === hero) {
+                assets.playSound('spikes');
                 ret.emit('lost');
             }
         });
@@ -247,6 +257,9 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
 
         // Applies a force to the hero to make it move
         hero.applyForce(force, hero.position);
+
+        // Plays the sound effect
+        assets.playSound('hit' + Math.floor(1 + 5 * Math.random()));
 
     };
 

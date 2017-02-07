@@ -52,14 +52,18 @@ export default class AssetManager {
     downloadAll() {
         let ret = Promise.resolve();
         
-        const consumeQueue = (p, q, c) =>
+        const consumeQueue = (p, q, dest, c) =>
             p.then(() => Promise.all(q.map(req =>
                 new Promise((resolve, reject) => {
 
                     // Construct a new native element and listen for the load and error events
                     const el = new c();
                     el.addEventListener('load', () => {
-                        this[IMAGES][req[0]] = el;
+                        dest[req[0]] = el;
+                        resolve();
+                    }, false);
+                    el.addEventListener('loadeddata', () => {
+                        dest[req[0]] = el;
                         resolve();
                     }, false); 
                     el.addEventListener('error', reject, false);
@@ -68,8 +72,8 @@ export default class AssetManager {
                 })
             )))
         
-        ret = consumeQueue(ret, this[IMAGES_QUEUE], Image);
-        ret = consumeQueue(ret, this[SOUNDS_QUEUE], Audio);
+        ret = consumeQueue(ret, this[IMAGES_QUEUE], this[IMAGES], Image);
+        ret = consumeQueue(ret, this[SOUNDS_QUEUE], this[SOUNDS], Audio);
 
         this[IMAGES_QUEUE] = [];
         this[SOUNDS_QUEUE] = [];
@@ -93,8 +97,11 @@ export default class AssetManager {
      * @param {string} name - Name of the sound.
      * @returns {Audio} Sound with the given name.
      */
-    getSound(name) {
-        return this[SOUNDS][name];
+    playSound(name) {
+        const sound = this[SOUNDS][name];
+        sound.pause();
+        sound.currentTime = 0;
+        sound.play();
     }
 
 }
