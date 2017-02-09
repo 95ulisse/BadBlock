@@ -15,6 +15,10 @@ import styles from './Level.scss';
 
 
 
+const DRAG_THRESHOLD = 20;
+const MAX_DRAG_DISTANCE = 100;
+const MAX_FORCE = 0.02;
+
 const starsComparer = (current, candidate) =>
     current.props.stars != candidate.props.stars;
 
@@ -55,7 +59,9 @@ export default class Level extends Component {
         this.state = {
             state: 'beforeStart', // beforeStart | playing | paused | won | lost
             coinsCollected: 0,
-            shots: 0
+            shots: 0,
+            dragStart: null,
+            mousePos: null
         };
 
         // These objects reside of the state because they will never change
@@ -165,6 +171,18 @@ export default class Level extends Component {
     }
 
     @autobind
+    onCanvasMouseDown(e) {
+        
+        if (this.state.state != 'playing') {
+            return;
+        }
+
+        // Store the start point of the drag operation
+        this.setState({ dragStart: relativizeMouseEvent(e) });
+
+    }
+
+    @autobind
     onCanvasMouseMove(e) {
 
         if (this.state.state != 'playing') {
@@ -172,71 +190,99 @@ export default class Level extends Component {
         }
 
         // Update the position of the mouse.
-        // At the next tick of the timer, the particles will be redrawn.
-        this.mousePos = relativizeMouseEvent(e);
+        this.setState({ mousePos: relativizeMouseEvent(e) });
 
     }
 
     @autobind
-    onCanvasMouseDown(e) {
-        const { state, shots } = this.state;
+    onCanvasMouseUp() {
+        const level = this.level;
+        const hero = level.hero;
+        const { state, shots, dragStart, mousePos } = this.state;
+        const { assets } = this.props;
 
         if (state != 'playing') {
             return;
         }
 
-        // Hit that block!
-        this.level.shot(relativizeMouseEvent(e));
+        // Makes sure that the user dragged at least a bit
+        const distance = dragStart.sub(mousePos);
+        if (distance.length() < DRAG_THRESHOLD) {
+            this.setState({ dragStart: null });
+            return;
+        }
+
+        // Computes the force to apply along the direction
+        // connecting the point and the center of the body.
+        // The closer the point is, the harder the hero gets shot.
+        const force =
+            distance.normalize()
+            .scalar(Math.min(MAX_FORCE, MAX_FORCE * distance.length() / MAX_DRAG_DISTANCE));
+
+        // Applies a force to the hero to make it move
+        hero.applyForce(force, hero.position);
+
+        // Plays the sound effect
+        assets.playSound('hit' + Math.floor(1 + 5 * Math.random()));
 
         // Increment the shots count
-        this.setState({ shots: shots + 1 });
+        this.setState({
+            dragStart: null,
+            shots: shots + 1
+        });
 
     }
 
     @autobind
     onFrameDrawn(context) {
-        const { mousePos, particles, level: { hero } } = this;        
+        const { particles, level: { hero } } = this;
+        const { dragStart, mousePos } = this.state;
         
         // Enable additive blending.
         // Particles do not have to completely cover what was previously drawn.
         context.globalCompositeOperation = 'lighter';
         context.globalAlpha = 0.5;
 
-        if (mousePos) {
+        if (dragStart) {
             const angleToDraw = Math.PI / 8;
-            const r = mousePos.sub(hero.position);
+            const r = mousePos.sub(dragStart);
             const beginAngle = r.direction() - (angleToDraw / 2) + (r.x < 0 ? Math.PI : 0);
             const endAngle = beginAngle + angleToDraw;
 
-            // Cursor particles
+            // Circle representing the drag threshold
             context.beginPath();
-            context.arc(hero.position.x, hero.position.y, r.length(), beginAngle, endAngle);
-            context.moveTo(mousePos.x, mousePos.y);
-            context.lineTo(hero.position.x, hero.position.y);
+            context.arc(dragStart.x, dragStart.y, DRAG_THRESHOLD, 0, 2 * Math.PI);
+            context.arc(dragStart.x, dragStart.y, DRAG_THRESHOLD * 0.7, 0, 2 * Math.PI);
+            context.arc(dragStart.x, dragStart.y, DRAG_THRESHOLD * 0.5, 0, 2 * Math.PI);
+            context.fillStyle = 'white';
+            context.fill('evenodd');
 
-            context.strokeStyle = 'white';
-            context.lineCap = 'round';
-            context.lineWidth = 5;
-            context.stroke();
+            if (r.length() > DRAG_THRESHOLD) {
 
-            // Direction prediction.
-            // The prediction should be proportional to the strength of the shot.
-            const predictionLength = Math.min(200, 100 * 200 * (1 / r.length()));
-            const prediction = r.normalize().scalar(-predictionLength).add(hero.position);
-            context.beginPath();
-            context.moveTo(hero.position.x, hero.position.y);
-            context.lineTo(prediction.x, prediction.y);
+                // Direction prediction.
+                // The prediction should be proportional to the strength of the shot.
+                const predictionLength = Math.min(MAX_DRAG_DISTANCE, r.length());
+                const prediction = r.normalize().scalar(-predictionLength);
+                const predictionFromDragstart = prediction.add(dragStart);
+                const predictionFromHero = prediction.add(hero.position);
+                context.beginPath();
+                context.moveTo(dragStart.x, dragStart.y);
+                context.lineTo(predictionFromDragstart.x, predictionFromDragstart.y);
+                context.moveTo(hero.position.x, hero.position.y);
+                context.lineTo(predictionFromHero.x, predictionFromHero.y);
 
-            context.strokeStyle = interpolators.hsl(
-                { h: 120, s: 1, l: 0.5 },
-                { h: 0, s: 1, l: 0.5 },
-                predictionLength / 200
-            );
-            context.lineCap = 'butt';
-            context.lineWidth = 3;
-            context.setLineDash([ 10, 10 ]);
-            context.stroke();
-            context.setLineDash([]);
+                context.strokeStyle = interpolators.hsl(
+                    { h: 120, s: 1, l: 0.5 },
+                    { h: 0, s: 1, l: 0.5 },
+                    predictionLength / MAX_DRAG_DISTANCE
+                );
+                context.lineCap = 'round';
+                context.lineWidth = 5;
+                context.setLineDash([ 1, 10 ]);
+                context.stroke();
+                context.setLineDash([]);
+
+            }
 
         }
 
@@ -322,8 +368,10 @@ export default class Level extends Component {
 
                     {/* Game canvas */}
                     <canvas width="640" height="480" className={modal ? styles['blurred'] : ''}
-                        ref={this.onCanvasRef} onMouseDown={this.onCanvasMouseDown}
-                        onMouseMove={this.onCanvasMouseMove}>
+                        ref={this.onCanvasRef}
+                        onMouseDown={this.onCanvasMouseDown}
+                        onMouseMove={this.onCanvasMouseMove}
+                        onMouseUp={this.onCanvasMouseUp}>
                     </canvas>
 
                     {/* Modal messages that will apear above the game */}

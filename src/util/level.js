@@ -260,25 +260,6 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
 
     // Public methods
 
-    // Hits the hero from the given point
-    ret.shot = (point) => {
-
-        // Computes the force to apply along the direction
-        // connecting the point and the center of the body.
-        // The closer the point is, the harder the hero gets shot.
-        const distance = hero.position.sub(point);
-        const force =
-            distance.normalize()
-            .scalar(Math.min(0.02, 3 * 1 / distance.length()));
-
-        // Applies a force to the hero to make it move
-        hero.applyForce(force, hero.position);
-
-        // Plays the sound effect
-        assets.playSound('hit' + Math.floor(1 + 5 * Math.random()));
-
-    };
-
     // Returns the number of stars to assign if the user completed the level
     // with the given number of shots.
     ret.computeStars = (shots) => {
