@@ -22,21 +22,21 @@ const MAX_FORCE = 0.02;
 const starsComparer = (current, candidate) =>
     current.props.stars != candidate.props.stars;
 
-const relativizeMouseEvent = (e) => {
+const relativizePoint = ({x, y}, target) => {
     
     // We need to relativize the coordinates, so we traverse the hierarchy
     // to compute the total offset of the element from the document
     let offsetX = 0;
     let offsetY = 0;
-    let parent = e.target;
+    let parent = target;
     while (parent) {
         offsetX += parent.offsetLeft;
         offsetY += parent.offsetTop;
         parent = parent.offsetParent;
     }
     return new Vector(
-        e.pageX - offsetX,
-        e.pageY - offsetY
+        x - offsetX,
+        y - offsetY
     );
 
 };
@@ -74,6 +74,19 @@ export default class Level extends Component {
         // Manually build the level the first time
         this.buildLevel();
 
+    }
+
+    // The handlers are set directly on the body so that the events can be captured
+    // even from outside of the main canvas.
+
+    componentDidMount() {
+        document.addEventListener('mousemove', this.onDocumentMouseMove, false);
+        document.addEventListener('mouseup', this.onDocumentMouseUp, false);
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('mousemove', this.onDocumentMouseMove, false);
+        document.removeEventListener('mouseup', this.onDocumentMouseUp, false);
     }
 
     componentWillReceiveProps(nextProps) {
@@ -178,30 +191,30 @@ export default class Level extends Component {
         }
 
         // Store the start point of the drag operation
-        this.setState({ dragStart: relativizeMouseEvent(e) });
+        this.setState({ dragStart: new Vector(e.pageX, e.pageY) });
 
     }
 
     @autobind
-    onCanvasMouseMove(e) {
+    onDocumentMouseMove(e) {
 
         if (this.state.state != 'playing') {
             return;
         }
 
         // Update the position of the mouse.
-        this.setState({ mousePos: relativizeMouseEvent(e) });
+        this.setState({ mousePos: new Vector(e.pageX, e.pageY) });
 
     }
 
     @autobind
-    onCanvasMouseUp() {
+    onDocumentMouseUp() {
         const level = this.level;
         const hero = level.hero;
         const { state, shots, dragStart, mousePos } = this.state;
         const { assets } = this.props;
 
-        if (state != 'playing') {
+        if (state != 'playing' || !dragStart) {
             return;
         }
 
@@ -235,15 +248,20 @@ export default class Level extends Component {
 
     @autobind
     onFrameDrawn(context) {
-        const { particles, level: { hero } } = this;
-        const { dragStart, mousePos } = this.state;
+        const { canvas, particles, level: { hero } } = this;
+        let { dragStart, mousePos } = this.state;
         
         // Enable additive blending.
         // Particles do not have to completely cover what was previously drawn.
         context.globalCompositeOperation = 'lighter';
         context.globalAlpha = 0.5;
-
+        
         if (dragStart) {
+
+            // We need to relativize the coordinates of the mouse to render the indicators
+            dragStart = relativizePoint(dragStart, canvas);
+            mousePos = relativizePoint(mousePos, canvas);
+
             const angleToDraw = Math.PI / 8;
             const r = mousePos.sub(dragStart);
             const beginAngle = r.direction() - (angleToDraw / 2) + (r.x < 0 ? Math.PI : 0);
@@ -369,9 +387,7 @@ export default class Level extends Component {
                     {/* Game canvas */}
                     <canvas width="640" height="480" className={modal ? styles['blurred'] : ''}
                         ref={this.onCanvasRef}
-                        onMouseDown={this.onCanvasMouseDown}
-                        onMouseMove={this.onCanvasMouseMove}
-                        onMouseUp={this.onCanvasMouseUp}>
+                        onMouseDown={this.onCanvasMouseDown}>
                     </canvas>
 
                     {/* Modal messages that will apear above the game */}
