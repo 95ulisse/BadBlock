@@ -1,14 +1,5 @@
 [
     {
-        "name": "Instant win",
-        "stars": [ -1, 0, 1 ],
-        "heroPosition": { "x": 100, "y": 100 },
-        "goalPosition": { "x": 100, "y": 200 }, 
-        "coins": [
-            { "x": 100, "y": 150 }
-        ]
-    },
-    {
         "name": "Slow start",
         "stars": [ 3, 4, 5 ],
         "heroPosition": { "x": 100, "y": 100 },
