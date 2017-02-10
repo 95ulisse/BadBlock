@@ -105,7 +105,7 @@
     },
     {
         "name": "So massive...",
-        "stars": [ 5, 6, 7 ],
+        "stars": [ 9, 10, 11 ],
         "heroPosition": { "x": 100, "y": 60 },
         "goalPosition": { "x": 580, "y": 420 },
         "coins": [

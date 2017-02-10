@@ -259,13 +259,44 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
 
     // Attractors
     const attractors = level.attractors.map(a => {
+        const imageWidth = 236;
         const attractor = BodyFactory.circle(a.x, a.y, a.radius, {
             isStatic: true,
             render: {
-                pattern: assets.getImage('moon')
+                draw: (context, b, __, helpers) => {
+                    // Use the hull as a clipping region and paint the background image
+                    const off = b.imageOffset;
+                    const { x, y } = attractor.bounds.min;
+                    helpers.drawHull();
+                    context.save();
+                    context.clip()
+                    context.drawImage(assets.getImage('moon'), 0, 0, imageWidth, imageWidth, x - off, y, imageWidth, imageWidth);
+                    if (x - off + imageWidth <= attractor.bounds.max.x) {
+                        context.drawImage(assets.getImage('moon'), 0, 0, imageWidth, imageWidth, x - off + imageWidth, y, imageWidth, imageWidth);
+                    }
+
+                    // Small transparent glow
+                    const brush = context.createRadialGradient(attractor.position.x, attractor.position.y, 0, attractor.position.x, attractor.position.y, a.radius);
+                    brush.addColorStop(0, 'transparent');
+                    brush.addColorStop(0.3, 'transparent');
+                    brush.addColorStop(1, '#111');
+                    context.fillStyle = brush;
+                    context.fillRect(x, y, attractor.bounds.max.x, attractor.bounds.max.y);
+
+                    // Remove clipping
+                    context.restore();
+
+                    // Ink
+                    helpers.drawFull();
+
+                }
             }
         });
+        attractor.imageOffset = 0;
         attractor.radius = a.radius;
+        ret.timeline.animateTo(attractor, 'imageOffset', imageWidth, 3000, {
+            loop: 'loop'
+        });
         particles.push(new CircleParticle(ret.timeline, attractor.position, 'black', 100, true));
         return attractor;
     });
