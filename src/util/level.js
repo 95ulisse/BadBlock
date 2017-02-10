@@ -17,6 +17,7 @@ const HERO_SIZE = 20;
 const COIN_RADIUS = 8;
 const GOAL_RADIUS = 24;
 const SPIKES_WIDTH = 12;
+const GRAVITY_SCALE = 6;
 
 /**
  * Transforms the object description of a level in actual bodies for the physics.
@@ -57,7 +58,8 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
         },
         coins: [],
         walls: [],
-        spikes: []
+        spikes: [],
+        attractors: []
     }, level);
 
     // Creates the EventEmitter that we will return
@@ -254,6 +256,34 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
             }
         });
     }));
+
+    // Attractors
+    const attractors = level.attractors.map(a => {
+        const attractor = BodyFactory.circle(a.x, a.y, a.radius, {
+            isStatic: true,
+            render: {
+                pattern: assets.getImage('moon')
+            }
+        });
+        attractor.radius = a.radius;
+        particles.push(new CircleParticle(ret.timeline, attractor.position, 'black', 100, true));
+        return attractor;
+    });
+    bodies.push(...attractors);
+    engine.on('preUpdate', () => {
+        // Apply gravitational force from every attractor to the hero
+        for (const a of attractors) {
+            const r = a.position.sub(hero.position);
+            const dir = r.normalize();
+            const m = a.radius * a.radius * a.density;
+            hero.applyForce(
+                dir.scalar(
+                    GRAVITY_SCALE * hero.mass * m / r.lengthSquared()
+                ),
+                hero.position
+            );
+        }
+    });
 
     // Starts the timeline
     ret.timeline.start();

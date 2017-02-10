@@ -11,7 +11,8 @@ export const loadAssets = () => dispatch => {
             coin: '/assets/coin.png',
             goal: '/assets/goal.png',
             wall: '/assets/wall.png',
-            spikes: '/assets/spikes.png'
+            spikes: '/assets/spikes.png',
+            moon: '/assets/moon.jpg'
         })
         .queueSounds({
             coin: '/assets/coin.mp3',

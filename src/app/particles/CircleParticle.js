@@ -1,5 +1,4 @@
 // Some parameters to configure the animation
-const MAX_RADIUS = 50;
 const ANIMATION_DURATION = 800;
 const LOOP_DELAY = 3000;
 const LINE_WIDTH = 5;
@@ -9,14 +8,15 @@ const LINE_WIDTH = 5;
  */
 export default class CircleParticle {
 
-    constructor(timeline, center, color) {
+    constructor(timeline, center, color, radius = 50, inwards = false) {
         this._timeline = timeline;
         this._center = center;
         this._color = color;
-        this._radius = 0;
+        this._radius = radius;
+        this._currentRadius = inwards ? radius : 0;
 
         // Create the animation and store the tween
-        timeline.animateTo(this, '_radius', MAX_RADIUS, ANIMATION_DURATION, {
+        timeline.animateTo(this, '_currentRadius', inwards ? 0 : radius, ANIMATION_DURATION, {
             loop: 'loop',
             loopDelay: LOOP_DELAY
         });
@@ -24,14 +24,23 @@ export default class CircleParticle {
     }
 
     render(context) {
-        const { _radius: radius, _center: center, _color: color } = this;
+        const {
+            _currentRadius: currentRadius,
+            _radius: radius,
+            _center: center,
+            _color: color
+        } = this;
+
+        if (currentRadius === 0) {
+            return;
+        }
 
         // We compute the opacity based on the current radius
-        context.globalAlpha = 1 - (radius / MAX_RADIUS);
+        context.globalAlpha = 1 - (currentRadius / radius);
 
         // Draw the circle
         context.beginPath();
-        context.arc(center.x, center.y, radius, 0, 2 * Math.PI);
+        context.arc(center.x, center.y, currentRadius, 0, 2 * Math.PI);
         context.lineWidth = LINE_WIDTH;
         context.strokeStyle = color;
         context.stroke();
