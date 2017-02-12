@@ -93,12 +93,54 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
         HERO_SIZE,
         {
             render: {
-                showAxes: true
+                draw: (context, _, __, helpers) => {
+                    
+                    // Draws the rectangle at the old positions with decreasing opacity
+                    const maxOpacity = 0.3;
+                    for (let i = hero.prevPositions.length - 1; i >= 0; i--) {
+                        
+                        // Old hull
+                        const vertices = hero.prevPositions[i];
+                        context.beginPath();
+                        context.moveTo(vertices[0].x, vertices[0].y);
+                        vertices.forEach(v => context.lineTo(v.x, v.y));
+                        context.lineTo(vertices[0].x, vertices[0].y);
+
+                        // Filll and stroke with opacity
+                        context.globalAlpha = maxOpacity - i * (maxOpacity / hero.prevPositions.length);
+                        context.fillStyle = '#dcb164';
+                        context.fill();
+                        context.stroke();
+
+                    }
+
+                    // Draws the rectangle representing the hero
+                    context.globalAlpha = 1;
+                    helpers.drawHull();
+                    context.fillStyle = '#dcb164';
+                    context.fill();
+                    context.stroke();
+
+                }
             }
         }
     );
+    hero.prevPositions = [];
     ret.hero = hero;
     bodies.push(hero);
+
+    // Snapshot of the cube every 5 updates
+    let heroUpdateCount = 0;
+    engine.on('preUpdate', () => {
+        heroUpdateCount++;
+        if (heroUpdateCount >= 5) {
+            heroUpdateCount = 0;
+            hero.prevPositions.unshift(Array.prototype.slice.call(hero.vertices));
+            while (hero.prevPositions.length > 10) {
+                hero.prevPositions.pop();
+            }
+        }
+    });
 
     // The goal
     const goal = BodyFactory.circle(
