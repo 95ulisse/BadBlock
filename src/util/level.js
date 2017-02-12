@@ -12,7 +12,7 @@ import { interpolators } from '../util/Tween';
 import CircleParticle from '../app/particles/CircleParticle';
 import FadingCoinParticle from '../app/particles/FadingCoinParticle';
 
-const WALLS_WIDTH = 20;
+const EXTERNAL_CAGE = 120;
 const HERO_SIZE = 20;
 const COIN_RADIUS = 8;
 const GOAL_RADIUS = 24;
@@ -68,13 +68,15 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
     // Creates the Timeline object that will animate sprite frames
     ret.timeline = new Timeline([], timer);
 
-    // First of all, create the cage that represents our world bounds
+    // First of all, create the cage that represents our world bounds.
+    // The cage should extend even beyond the canvas to be sure that the hero
+    // does not escape even if he gains a lot of speed.
     bodies.push(...BodyFactory.cage(
-        0,
-        0,
-        level.worldSize.width + 2 * WALLS_WIDTH,
-        level.worldSize.height + 2 * WALLS_WIDTH,
-        WALLS_WIDTH,
+        -EXTERNAL_CAGE + 20,
+        -EXTERNAL_CAGE + 20,
+        level.worldSize.width + 2 * EXTERNAL_CAGE - 100,
+        level.worldSize.height + 2 * EXTERNAL_CAGE - 100,
+        EXTERNAL_CAGE,
         {
             isStatic: true,
             render: {
