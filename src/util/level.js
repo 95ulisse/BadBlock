@@ -215,6 +215,7 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
 
                 // Fading coin particle (used when the coin is collected)
                 const fadeParticle = new FadingCoinParticle(ret.timeline, coin);
+                fadeParticle.addParticlesToEngine(engine);
                 particles.push(fadeParticle);
                 fadeParticle.on('end', () => particles.splice(particles.indexOf(fadeParticle), 1));
 

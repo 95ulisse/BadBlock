@@ -1,10 +1,14 @@
 import EventEmitter from 'eventemitter3';
+import { Body, Vector } from 'phy6-js';
 import { interpolators } from '../../util/Tween';
 
 const SPIN_SPEED = 200;
 const UP = 30;
 const UP_DURATION = 1000;
 const UP_DELAY = 500;
+const PARTICLE_NUMBER = 20;
+const PARTICLE_SIZE = 3;
+const PARTICLE_TTL = 80;
 
 export default class FadingCoinParticle extends EventEmitter {
 
@@ -43,6 +47,36 @@ export default class FadingCoinParticle extends EventEmitter {
         context.globalAlpha = 1 - (up / UP);
         context.drawImage(image, sx, sy, width, height, dx + pos.x, dy + pos.y - up, width, height);
 
+    }
+
+    addParticlesToEngine(engine) {
+        for (let i = 0; i < PARTICLE_NUMBER; i++) {
+            const particle = new Body({
+                position: this._coin.position,
+                vertices: [
+                    new Vector(-PARTICLE_SIZE, -PARTICLE_SIZE),
+                    new Vector(PARTICLE_SIZE, -PARTICLE_SIZE),
+                    new Vector(PARTICLE_SIZE, PARTICLE_SIZE),
+                    new Vector(-PARTICLE_SIZE, PARTICLE_SIZE)
+                ],
+                previousPosition: new Vector(5 * Math.random() * (10 * Math.random() < 5 ? 1 : -1), 5 * Math.random()),
+                isParticle: true,
+                ttl: PARTICLE_TTL,
+                render: {
+                    draw: (context, p, _, helpers) => {
+                        helpers.drawHull();
+                        context.fillStyle = `rgba(${p.color.r}, ${p.color.g}, ${p.color.b}, ${p.ttl / PARTICLE_TTL})`;
+                        context.fill();
+                    }
+                }
+            });
+            particle.color = {
+                r: Math.ceil(255 * Math.random()),
+                g: Math.ceil(255 * Math.random()),
+                b: Math.ceil(255 * Math.random())
+            };
+            engine.bodies.push(particle);
+        }
     }
 
 }
