@@ -41,11 +41,13 @@
     "extract-text-webpack-plugin": "^1.0.1",
     "gulp": "^3.9.1",
     "gulp-eslint": "^3.0.1",
+    "gulp-html-minifier": "^0.1.8",
     "gulp-util": "^3.0.7",
     "node-sass": "^3.13.0",
     "postcss-loader": "^1.1.1",
     "sass-loader": "^4.0.2",
     "webpack": "^1.13.3",
-    "webpack-dev-server": "^1.16.2"
+    "webpack-dev-server": "^1.16.2",
+    "webpack-stream": "^3.2.0"
   }
 }
