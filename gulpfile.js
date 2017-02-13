@@ -5,6 +5,7 @@ var path = require('path'),
     gutil = require('gulp-util'),
     eslint = require('gulp-eslint'),
     minifyHtml = require('gulp-html-minifier'),
+    jsonminify = require('gulp-json-minify'),
     webpack = require('webpack'),
     webpackStream = require('webpack-stream'),
     WebpackDevServer = require('webpack-dev-server');
@@ -45,7 +46,7 @@ gulp.task('serve', [], function () {
 
 });
 
-gulp.task('build', [ 'build-js', 'build-html', 'build-static' ]);
+gulp.task('build', [ 'build-js', 'build-html', 'build-static-assets', 'build-static-json' ]);
 
 gulp.task('build-js', function () {
 
@@ -91,9 +92,17 @@ gulp.task('build-html', function () {
         .pipe(gulp.dest('./out'));
 });
 
-gulp.task('build-static', function () {
+gulp.task('build-static-assets', function () {
     return gulp.src([
-        './src/assets/*.{json,mp3,png,jpg}'
+        './src/assets/*.{mp3,png,jpg}'
         ])
+        .pipe(gulp.dest('./out/assets'));
+});
+
+gulp.task('build-static-json', function () {
+    return gulp.src([
+        './src/assets/*.json'
+        ])
+        .pipe(jsonminify())
         .pipe(gulp.dest('./out/assets'));
 });

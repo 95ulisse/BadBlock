@@ -42,6 +42,7 @@
     "gulp": "^3.9.1",
     "gulp-eslint": "^3.0.1",
     "gulp-html-minifier": "^0.1.8",
+    "gulp-json-minify": "^1.0.7",
     "gulp-util": "^3.0.7",
     "node-sass": "^3.13.0",
     "postcss-loader": "^1.1.1",

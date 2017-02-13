@@ -2,7 +2,7 @@ import { Engine, Timer, Renderer } from 'phy6-js';
 import * as LevelHelpers from '../../util/level';
 
 export const updateLevels = () => dispatch => {
-    return fetch('/assets/levels.json')
+    return fetch('/assets/levels.json?t=' + (new Date().getTime()))
         .then(res => res.json())
         .then(l => dispatch({ type: 'UPDATE_LEVELS', payload: l }));
 };
