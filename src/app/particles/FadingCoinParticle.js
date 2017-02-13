@@ -6,9 +6,9 @@ const SPIN_SPEED = 200;
 const UP = 30;
 const UP_DURATION = 1000;
 const UP_DELAY = 500;
-const PARTICLE_NUMBER = 20;
+const PARTICLE_NUMBER = 30;
 const PARTICLE_SIZE = 3;
-const PARTICLE_TTL = 80;
+const PARTICLE_TTL = 100;
 
 export default class FadingCoinParticle extends EventEmitter {
 
@@ -59,7 +59,7 @@ export default class FadingCoinParticle extends EventEmitter {
                     new Vector(PARTICLE_SIZE, PARTICLE_SIZE),
                     new Vector(-PARTICLE_SIZE, PARTICLE_SIZE)
                 ],
-                previousPosition: new Vector(5 * Math.random() * (10 * Math.random() < 5 ? 1 : -1), 5 * Math.random()),
+                previousPosition: new Vector(7 * Math.random() * (10 * Math.random() < 5 ? 1 : -1), 7 * Math.random()),
                 isParticle: true,
                 ttl: PARTICLE_TTL,
                 render: {
