@@ -16,6 +16,7 @@ const EXTERNAL_CAGE = 120;
 const HERO_SIZE = 20;
 const COIN_RADIUS = 8;
 const GOAL_RADIUS = 24;
+const BOX_SIZE = 30;
 const SPIKES_WIDTH = 12;
 const GRAVITY_SCALE = 6;
 
@@ -59,7 +60,8 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
         coins: [],
         walls: [],
         spikes: [],
-        attractors: []
+        attractors: [],
+        boxes: []
     }, level);
 
     // Creates the EventEmitter that we will return
@@ -360,6 +362,31 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
             );
         }
     });
+
+    // Boxes
+    bodies.push(...level.boxes.map(b =>
+        BodyFactory.rect(b.x, b.y, BOX_SIZE, BOX_SIZE, {
+            density: hero.density / 6,
+            render: {
+                draw: (context, b, _, helpers) => {
+
+                    // Rotate the canvas around the center of the box
+                    context.save();
+                    context.translate(b.position.x, b.position.y);
+                    context.rotate(b.angle);
+
+                    // Draw the box image
+                    context.drawImage(assets.getImage('box'), 0, 0, BOX_SIZE, BOX_SIZE, -BOX_SIZE / 2, - BOX_SIZE / 2, BOX_SIZE, BOX_SIZE);
+                    context.restore();
+                    
+                    // Ink the box
+                    helpers.drawHull();
+                    context.stroke();
+
+                }
+            }
+        })
+    ));
 
     // Starts the timeline
     ret.timeline.start();
