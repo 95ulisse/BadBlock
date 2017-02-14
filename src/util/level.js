@@ -314,7 +314,10 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
                     // Use the hull as a clipping region and paint the background image
                     const off = b.imageOffset;
                     const { x, y } = attractor.bounds.min;
-                    helpers.drawHull();
+                    //helpers.drawHull();
+                    context.beginPath();
+                    context.moveTo(a.x + a.radius, a.y);
+                    context.arc(a.x, a.y, a.radius, 0, 2 * Math.PI);
                     context.save();
                     context.clip()
                     context.drawImage(assets.getImage('moon'), 0, 0, imageWidth, imageWidth, x - off, y, imageWidth, imageWidth);
@@ -334,7 +337,8 @@ export const buildLevel = (level, engine, timer, assets, particles) => {
                     context.restore();
 
                     // Ink
-                    helpers.drawFull();
+                    //helpers.drawFull();
+                    context.stroke();
 
                 }
             }
